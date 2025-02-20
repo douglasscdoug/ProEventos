@@ -6,7 +6,7 @@ namespace ProEventos.API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class EventoController(DataContext _context) : ControllerBase
+public class EventosController(DataContext _context) : ControllerBase
 {
     public DataContext Context { get; } = _context;
 
