@@ -2,7 +2,7 @@ import {
   CommonModule,
   DOCUMENT,
   isPlatformBrowser
-} from "./chunk-GVXRWJNX.js";
+} from "./chunk-CO5BOON7.js";
 import {
   ApplicationRef,
   Component,
@@ -26,8 +26,6 @@ import {
   Subject,
   TemplateRef,
   ViewContainerRef,
-  __spreadProps,
-  __spreadValues,
   animationFrameScheduler,
   fromEvent,
   merge,
@@ -51,7 +49,11 @@ import {
   ɵɵprojection,
   ɵɵprojectionDef,
   ɵɵresolveWindow
-} from "./chunk-ER5NNDE3.js";
+} from "./chunk-BXQ3LSKQ.js";
+import {
+  __spreadProps,
+  __spreadValues
+} from "./chunk-EPAV4CNQ.js";
 
 // node_modules/ngx-bootstrap/utils/fesm2022/ngx-bootstrap-utils.mjs
 var Trigger = class {
