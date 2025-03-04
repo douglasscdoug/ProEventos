@@ -1,0 +1,25 @@
+{
+  "tema": "Angular",
+  "local": "BH",
+  "dataEvento": "2025-03-04",
+  "qtdPessoas": 250,
+  "imagemUrl": "Foto1.png",
+  "telefone": "116699882525",
+  "email": "angular@angular.com",
+  "lotes": [
+    {
+      "nome": "1º lote",
+      "preco": 25,
+      "dataInicio": "2025-03-04",
+      "dataFim": "2025-03-10",
+      "quantidade": 250
+    }
+  ],
+  "redesSociais": [
+    {
+      "nome": "Facebook",
+      "url": "facebook.com"
+    }
+  ],
+  "palestrantesEventos": null
+}
