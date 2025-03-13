@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { TituloComponent } from "../../shared/titulo/titulo.component";
+import { TituloComponent } from "@app/shared/titulo/titulo.component";
 
 @Component({
   selector: 'app-dashboard',

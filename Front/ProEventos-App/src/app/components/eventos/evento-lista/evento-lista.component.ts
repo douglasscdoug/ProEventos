@@ -1,14 +1,14 @@
 import { Component, OnInit, TemplateRef } from '@angular/core';
-import { EventoService } from '../../../services/evento.service';
+import { EventoService } from '@app/services/evento.service';
 import { BsModalRef, BsModalService, ModalModule } from 'ngx-bootstrap/modal';
 import { ToastrModule, ToastrService } from 'ngx-toastr';
 import { NgxSpinnerService } from 'ngx-spinner';
-import { Evento } from '../../../models/Evento';
+import { Evento } from '@app/models/Evento';
 import { CommonModule } from '@angular/common';
 import { CollapseModule } from 'ngx-bootstrap/collapse';
 import { FormsModule } from '@angular/forms';
 import { TooltipModule } from 'ngx-bootstrap/tooltip';
-import { DateTimeFormatPipe } from '../../../helpers/DateTimeFormat.pipe';
+import { DateTimeFormatPipe } from '@app/helpers/DateTimeFormat.pipe';
 import { Router, RouterLink } from '@angular/router';
 
 @Component({

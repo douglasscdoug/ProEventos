@@ -5,7 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { TooltipModule } from 'ngx-bootstrap/tooltip';
 import { BsModalService, ModalModule } from 'ngx-bootstrap/modal';
 import { ToastrModule } from 'ngx-toastr';
-import { TituloComponent } from "../../shared/titulo/titulo.component";
+import { TituloComponent } from "@app/shared/titulo/titulo.component";
 import { RouterOutlet } from '@angular/router';
 
 @Component({
