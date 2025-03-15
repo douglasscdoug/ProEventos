@@ -10,6 +10,7 @@ import { FormsModule } from '@angular/forms';
 import { TooltipModule } from 'ngx-bootstrap/tooltip';
 import { DateTimeFormatPipe } from '@app/helpers/DateTimeFormat.pipe';
 import { Router, RouterLink } from '@angular/router';
+import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-evento-lista',
@@ -38,7 +39,7 @@ export class EventoListaComponent implements OnInit {
   ngOnInit() {
     /** spinner starts on init */
     this.spinner.show();
-    this.getEventos();
+    this.carregarEventos();
   }
 
   public modalRef?: BsModalRef;
@@ -46,6 +47,7 @@ export class EventoListaComponent implements OnInit {
 
   public eventos : Evento[] = [];
   public eventosFiltrados: Evento[] = [];
+  public eventoId = 0;
 
   public mostrarImagem = true;
   private filtroListado = '';
@@ -71,7 +73,7 @@ export class EventoListaComponent implements OnInit {
     this.mostrarImagem = !this.mostrarImagem;
   }
 
-  public getEventos() : void {
+  public carregarEventos() : void {
     this.eventoService.getEventos().subscribe({
       next: (eventosResp: Evento[]) => {
         this.eventos = eventosResp;
@@ -87,13 +89,29 @@ export class EventoListaComponent implements OnInit {
     });
   }
 
-  openModal(template: TemplateRef<void>) {
+  openModal(event: any, template: TemplateRef<void>, eventoId: number) {
+    event.stopPropagation();
+    this.eventoId = eventoId;
     this.modalRef = this.modalService.show(template, { class: 'modal-sm' });
   }
  
   confirm(): void {
     this.modalRef?.hide();
-    this.toastr.success('Evento deletado com sucesso!', 'Sucesso!');
+    this.spinner.show();
+
+    this.eventoService.deleteEvento(this.eventoId).subscribe({
+      next: (result: any) => {
+        console.log(result);
+        if (result.message == 'Deletado')
+        {
+          this.toastr.success('Evento deletado com sucesso!', 'Sucesso!');
+          this.carregarEventos();
+        }
+      },
+      error: (error: any) => {
+        this.toastr.error(`Erro ao tentar deletar o evento Id: ${this.eventoId}`, 'Erro');
+      }
+    }).add(() => this.spinner.hide());
   }
  
   decline(): void {

@@ -103,9 +103,9 @@ public class EventosController(IEventoService _eventoService) : ControllerBase
             var evento = await EventoService.GetEventoByIdAsync(id);
             if(evento == null) return NoContent();
 
-            return await EventoService.DeleteEvento(id) ?
-                Ok("Deletado") :
-                throw new Exception("Ocorreu um erro ao tentar deletar o Evento.");
+            return await EventoService.DeleteEvento(id)
+                ? Ok(new {message = "Deletado"})
+                : throw new Exception("Ocorreu um erro ao tentar deletar o Evento.");
         }
         catch (Exception ex)
         {
