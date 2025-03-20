@@ -28,13 +28,13 @@ import {
   utcAsLocal
 } from "./chunk-IBKJQ2E6.js";
 import {
-  NG_VALIDATORS,
-  NG_VALUE_ACCESSOR
-} from "./chunk-TALYY2YA.js";
-import {
   ComponentLoaderFactory,
   PositioningService
 } from "./chunk-6U74TVB3.js";
+import {
+  NG_VALIDATORS,
+  NG_VALUE_ACCESSOR
+} from "./chunk-TALYY2YA.js";
 import {
   animate,
   state,

@@ -13,7 +13,7 @@ public class EventoDto
 
    [Required(ErrorMessage = "O Campo {0} é obrigatório.")]
    public required string Local { get; set; }
-   public string? DataEvento { get; set; }
+   public DateTime ? DataEvento { get; set; }
 
    [
       Display(Name = "Qtd Pessoas"),
