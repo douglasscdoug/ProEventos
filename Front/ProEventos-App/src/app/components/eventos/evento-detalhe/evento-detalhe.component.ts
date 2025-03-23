@@ -16,12 +16,14 @@ import { NgxSpinnerService } from 'ngx-spinner';
 import { Lote } from '@app/models/Lote';
 import { LoteService } from '@app/services/lote.service';
 import { BsModalRef, BsModalService } from 'ngx-bootstrap/modal';
+import { environment } from 'src/environments/environment';
+import { DateTimeFormatPipe } from "../../../helpers/DateTimeFormat.pipe";
 defineLocale('pt-br', ptBrLocale);
 
 @Component({
   selector: 'app-evento-detalhe',
   templateUrl: './evento-detalhe.component.html',
-  imports: [ReactiveFormsModule, CommonModule, BsDatepickerModule, NgxCurrencyDirective],
+  imports: [ReactiveFormsModule, CommonModule, BsDatepickerModule, NgxCurrencyDirective, DateTimeFormatPipe],
   styleUrls: ['./evento-detalhe.component.scss']
 })
 export class EventoDetalheComponent implements OnInit {
@@ -31,6 +33,8 @@ export class EventoDetalheComponent implements OnInit {
   evento = {} as Evento;
   estadoSalvar = 'post';
   loteAtual = {id: 0, nome: '', indice: 0};
+  imagemURL = 'assets/upload.png';
+  file!: File;
 
   get modoEditar(): boolean {
     return this.estadoSalvar === 'put';
@@ -82,7 +86,7 @@ export class EventoDetalheComponent implements OnInit {
       qtdPessoas: ['', [Validators.required, Validators.max(120000)]],
       telefone: ['', Validators.required],
       email: ['', [Validators.required, Validators.email]],
-      imagemUrl: ['', Validators.required],
+      imagemUrl: [''],
       lotes: this.fb.array([])
     });
   }
@@ -132,6 +136,11 @@ export class EventoDetalheComponent implements OnInit {
           }
 
           this.eventoForm.patchValue(this.evento);
+
+          if(this.evento.imagemUrl !== ''){
+            this.imagemURL = environment.apiUrl + 'resources/images/' + this.evento.imagemUrl;
+          }
+
           this.carregarLotes();
         },
         error: (error: any) => {
@@ -240,5 +249,34 @@ export class EventoDetalheComponent implements OnInit {
     return nome == null || nome == ''
                 ? 'Nome do Lote'
                 : nome;
+  }
+
+  public onFileChange(ev: any): void {
+    const reader = new FileReader();
+
+    reader.onload = (event: any) => this.imagemURL = event.target.result;
+
+    const files: FileList = ev.target.files;
+
+    if (files.length > 0) {
+      this.file = files[0];
+      reader.readAsDataURL(files[0]);
+    }
+
+    this.uploadImagem();
+  }
+
+  public uploadImagem(): void {
+    this.spinner.show();
+    this.eventoService.postUpload(this.eventoId, this.file).subscribe({
+      next: () => {
+        this.carregarEvento();
+        this.toastr.success('Imagem atualizada com sucesso', 'sucesso!');
+      },
+      error: (error: any) => {
+        this.toastr.error('Erro ao fazer upload da imagem', 'Erro!!');
+        console.error(error);
+      }
+    }).add(() => this.spinner.hide());
   }
 }

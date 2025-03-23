@@ -21,7 +21,7 @@
      <thead class="table-dark">
         <tr>
            <th class="d-none d-md-table-cell">
-              <button type="button" class="btn btn-outline-light btn-sm" (click)="exibirImagem()">
+              <button type="button" class="btn btn-outline-light btn-sm" (click)="alterarImagem()">
                  <i class="{{!mostrarImagem ? 'fa fa-eye' : 'fa fa-eye-slash'}}"></i>
                  {{!mostrarImagem ? 'Exibir' : 'Ocultar'}}
               </button>
@@ -38,7 +38,7 @@
      <tbody *ngIf="eventos && eventos.length">
         <tr *ngFor="let evento of eventosFiltrados" (click)="detalheEvento(evento.id)" style="cursor: pointer;">
            <td class="d-none d-md-table-cell">
-              <img [collapse]="!mostrarImagem" [isAnimated]="true" src="/assets/{{evento.imagemUrl}}"
+              <img [collapse]="!mostrarImagem" [isAnimated]="true" [src]="mostraImagem(evento.imagemUrl)"
                  class="fotosGrid">
            </td>
            <td>{{evento.id}}</td>

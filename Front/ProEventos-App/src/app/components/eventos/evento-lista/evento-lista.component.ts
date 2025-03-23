@@ -11,6 +11,7 @@ import { TooltipModule } from 'ngx-bootstrap/tooltip';
 import { DateTimeFormatPipe } from '@app/helpers/DateTimeFormat.pipe';
 import { Router, RouterLink } from '@angular/router';
 import { Observable } from 'rxjs';
+import { environment } from 'src/environments/environment';
 
 @Component({
   selector: 'app-evento-lista',
@@ -69,8 +70,14 @@ export class EventoListaComponent implements OnInit {
     )
   }
 
-  public exibirImagem() {
+  public alterarImagem(): void {
     this.mostrarImagem = !this.mostrarImagem;
+  }
+
+  public mostraImagem(imagemURL: string): string {
+    return (imagemURL !== '')
+      ? `${environment.apiUrl}resources/images/${imagemURL}`
+      : 'assets/semImagem.jpeg';
   }
 
   public carregarEventos() : void {

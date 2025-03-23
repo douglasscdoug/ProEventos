@@ -8,6 +8,7 @@ using ProEventos.Persistence;
 using ProEventos.Persistence.Contexts;
 using ProEventos.Persistence.Contratos;
 using AutoMapper;
+using Microsoft.Extensions.FileProviders;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -58,6 +59,11 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.UseCors("AllowAllOrigins");
+
+app.UseStaticFiles(new StaticFileOptions() {
+    FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "Resources")),
+    RequestPath = new PathString("/Resources")
+});
 
 app.UseAuthorization();
 
