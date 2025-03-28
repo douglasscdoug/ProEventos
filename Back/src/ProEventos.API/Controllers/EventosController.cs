@@ -1,29 +1,37 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using ProEventos.API.Extensions;
 using ProEventos.Application.Contratos;
 using ProEventos.Application.Dtos;
 
 namespace ProEventos.API.Controllers;
 
+[Authorize]
 [ApiController]
 [Route("api/[controller]")]
-public class EventosController(IEventoService _eventoService, IWebHostEnvironment hostEnvironment) : ControllerBase
+public class EventosController(
+    IEventoService _eventoService,
+    IWebHostEnvironment hostEnvironment,
+    IAccountService _accountService
+) : ControllerBase
 {
     public IEventoService EventoService { get; } = _eventoService;
     public IWebHostEnvironment HostEnvironment { get; } = hostEnvironment;
+    public IAccountService AccountService { get; } = _accountService;
 
     [HttpGet]
     public async Task<IActionResult> Get()
     {
         try
         {
-            var eventos = await EventoService.GetAllEventosAsync(true);
-            if(eventos == null) return NoContent();
+            var eventos = await EventoService.GetAllEventosAsync(User.GetUserId(), true);
+            if (eventos == null) return NoContent();
 
             return Ok(eventos);
         }
         catch (Exception ex)
         {
-            return this.StatusCode(StatusCodes.Status500InternalServerError, 
+            return this.StatusCode(StatusCodes.Status500InternalServerError,
                 $"Erro ao tentar recuperar eventos. Erro: {ex.Message}");
         }
     }
@@ -33,14 +41,14 @@ public class EventosController(IEventoService _eventoService, IWebHostEnvironmen
     {
         try
         {
-            var evento = await EventoService.GetEventoByIdAsync(id, true);
-            if(evento == null) return NoContent();
+            var evento = await EventoService.GetEventoByIdAsync(User.GetUserId(), id, true);
+            if (evento == null) return NoContent();
 
             return Ok(evento);
         }
         catch (Exception ex)
         {
-            return this.StatusCode(StatusCodes.Status500InternalServerError, 
+            return this.StatusCode(StatusCodes.Status500InternalServerError,
                 $"Erro ao tentar recuperar eventos. Erro: {ex.Message}");
         }
     }
@@ -50,14 +58,14 @@ public class EventosController(IEventoService _eventoService, IWebHostEnvironmen
     {
         try
         {
-            var evento = await EventoService.GetAllEventosByTemaAsync(tema, true);
-            if(evento == null) return NoContent();
+            var evento = await EventoService.GetAllEventosByTemaAsync(User.GetUserId(), tema, true);
+            if (evento == null) return NoContent();
 
             return Ok(evento);
         }
         catch (Exception ex)
         {
-            return this.StatusCode(StatusCodes.Status500InternalServerError, 
+            return this.StatusCode(StatusCodes.Status500InternalServerError,
                 $"Erro ao tentar recuperar eventos. Erro: {ex.Message}");
         }
     }
@@ -67,14 +75,14 @@ public class EventosController(IEventoService _eventoService, IWebHostEnvironmen
     {
         try
         {
-            var evento = await EventoService.AddEvento(model);
-            if(evento == null) return NoContent();
+            var evento = await EventoService.AddEvento(User.GetUserId(), model);
+            if (evento == null) return NoContent();
 
             return Ok(evento);
         }
         catch (Exception ex)
         {
-            return this.StatusCode(StatusCodes.Status500InternalServerError, 
+            return this.StatusCode(StatusCodes.Status500InternalServerError,
                 $"Erro ao tentar recuperar eventos. Erro: {ex.Message}");
         }
     }
@@ -84,25 +92,25 @@ public class EventosController(IEventoService _eventoService, IWebHostEnvironmen
     {
         try
         {
-            var evento = await EventoService.GetEventoByIdAsync(eventoId);
-            if(evento == null) return NoContent();
+            var evento = await EventoService.GetEventoByIdAsync(User.GetUserId(), eventoId);
+            if (evento == null) return NoContent();
 
             var file = Request.Form.Files[0];
 
             if (file.Length > 0)
             {
-                if(evento.ImagemUrl != null) DeleteImage(evento.ImagemUrl);
-                
+                if (evento.ImagemUrl != null) DeleteImage(evento.ImagemUrl);
+
                 evento.ImagemUrl = await SaveImage(file);
             }
 
-            var eventoRetorno = await EventoService.UpdateEvento(eventoId, evento);
+            var eventoRetorno = await EventoService.UpdateEvento(User.GetUserId(), eventoId, evento);
 
             return Ok(eventoRetorno);
         }
         catch (Exception ex)
         {
-            return this.StatusCode(StatusCodes.Status500InternalServerError, 
+            return this.StatusCode(StatusCodes.Status500InternalServerError,
                 $"Erro ao tentar recuperar eventos. Erro: {ex.Message}");
         }
     }
@@ -112,14 +120,14 @@ public class EventosController(IEventoService _eventoService, IWebHostEnvironmen
     {
         try
         {
-            var evento = await EventoService.UpdateEvento(id, model);
-            if(evento == null) return NoContent();
+            var evento = await EventoService.UpdateEvento(User.GetUserId(), id, model);
+            if (evento == null) return NoContent();
 
             return Ok(evento);
         }
         catch (Exception ex)
         {
-            return this.StatusCode(StatusCodes.Status500InternalServerError, 
+            return this.StatusCode(StatusCodes.Status500InternalServerError,
                 $"Erro ao tentar atualizar os eventos. Erro: {ex.Message}");
         }
     }
@@ -129,13 +137,13 @@ public class EventosController(IEventoService _eventoService, IWebHostEnvironmen
     {
         try
         {
-            var evento = await EventoService.GetEventoByIdAsync(id);
-            if(evento == null) return NoContent();
+            var evento = await EventoService.GetEventoByIdAsync(User.GetUserId(), id);
+            if (evento == null) return NoContent();
 
-            if (await EventoService.DeleteEvento(id))
-            {   
-                DeleteImage(evento.ImagemUrl);
-                return Ok(new {message = "Deletado"});
+            if (await EventoService.DeleteEvento(User.GetUserId(), id))
+            {
+                DeleteImage(evento.ImagemUrl ?? throw new Exception("Url da Imagem inválida"));
+                return Ok(new { message = "Deletado" });
             }
             else
             {
@@ -144,7 +152,7 @@ public class EventosController(IEventoService _eventoService, IWebHostEnvironmen
         }
         catch (Exception ex)
         {
-            return this.StatusCode(StatusCodes.Status500InternalServerError, 
+            return this.StatusCode(StatusCodes.Status500InternalServerError,
                 $"Erro ao tentar deletar os eventos. Erro: {ex.Message}");
         }
     }
@@ -158,7 +166,7 @@ public class EventosController(IEventoService _eventoService, IWebHostEnvironmen
 
         var imagePath = Path.Combine(HostEnvironment.ContentRootPath, @"Resources/Images", imageName);
 
-        using(var fileStream = new FileStream(imagePath, FileMode.Create))
+        using (var fileStream = new FileStream(imagePath, FileMode.Create))
         {
             await imageFile.CopyToAsync(fileStream);
         }
@@ -171,7 +179,7 @@ public class EventosController(IEventoService _eventoService, IWebHostEnvironmen
     {
         var imagePath = Path.Combine(HostEnvironment.ContentRootPath, @"Resources/Images", imageName);
 
-        if(System.IO.File.Exists(imagePath))
+        if (System.IO.File.Exists(imagePath))
             System.IO.File.Delete(imagePath);
     }
 }

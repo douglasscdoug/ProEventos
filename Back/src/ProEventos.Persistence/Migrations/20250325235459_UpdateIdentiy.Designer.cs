@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ProEventos.Persistence.Contexts;
 
@@ -10,9 +11,11 @@ using ProEventos.Persistence.Contexts;
 namespace ProEventos.Persistence.Migrations
 {
     [DbContext(typeof(ProEventosContext))]
-    partial class ProEventosContextModelSnapshot : ModelSnapshot
+    [Migration("20250325235459_UpdateIdentiy")]
+    partial class UpdateIdentiy
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.4");
@@ -181,6 +184,7 @@ namespace ProEventos.Persistence.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Descricao")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Email")
@@ -194,6 +198,7 @@ namespace ProEventos.Persistence.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("ImagemURL")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<bool>("LockoutEnabled")

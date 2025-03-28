@@ -52,7 +52,7 @@ public class PalestrantePersist(ProEventosContext _context) : IPalestrantePersis
                .ThenInclude(pe => pe.Evento);
          }
 
-         query = query.AsNoTracking().OrderBy(p => p.Id).Where(p => p.Nome.ToLower().Contains(nome.ToLower()));
+         query = query.AsNoTracking().OrderBy(p => p.Id).Where(p => p.User.Nome.ToLower().Contains(nome.ToLower()));
 
          return await query.ToArrayAsync();
     }
