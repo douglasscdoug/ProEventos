@@ -35,29 +35,28 @@ export class EventoListaComponent implements OnInit {
     private toastr: ToastrService,
     private spinner: NgxSpinnerService,
     private router: Router
-  ) {}
+  ) { }
 
   ngOnInit() {
     /** spinner starts on init */
-    this.spinner.show();
     this.carregarEventos();
   }
 
   public modalRef?: BsModalRef;
   public message?: string;
 
-  public eventos : Evento[] = [];
+  public eventos: Evento[] = [];
   public eventosFiltrados: Evento[] = [];
   public eventoId = 0;
 
   public mostrarImagem = true;
   private filtroListado = '';
 
-  public get filtroLista(){
+  public get filtroLista() {
     return this.filtroListado;
   }
 
-  public set filtroLista(value: string){
+  public set filtroLista(value: string) {
     this.filtroListado = value;
     this.eventosFiltrados = this.filtroLista ? this.filtrarEventos(this.filtroLista) : this.eventos;
   }
@@ -65,8 +64,8 @@ export class EventoListaComponent implements OnInit {
   public filtrarEventos(filtrarPor: string): Evento[] {
     filtrarPor = filtrarPor.toLocaleLowerCase();
     return this.eventos.filter(
-      (evento : {tema: string, local: string;}) => evento.tema.toLocaleLowerCase().indexOf(filtrarPor) !== -1 ||
-      evento.local.toLocaleLowerCase().indexOf(filtrarPor) !== -1
+      (evento: { tema: string, local: string; }) => evento.tema.toLocaleLowerCase().indexOf(filtrarPor) !== -1 ||
+        evento.local.toLocaleLowerCase().indexOf(filtrarPor) !== -1
     )
   }
 
@@ -80,13 +79,13 @@ export class EventoListaComponent implements OnInit {
       : 'assets/semImagem.jpeg';
   }
 
-  public carregarEventos() : void {
+  public carregarEventos(): void {
     this.eventoService.getEventos().subscribe({
       next: (eventosResp: Evento[]) => {
         this.eventos = eventosResp;
         this.eventosFiltrados = this.eventos;
       },
-      error: (error) =>{
+      error: (error) => {
         this.spinner.hide();
         this.toastr.error('Erro ao carregar os eventos', 'Erro')
       },
@@ -101,7 +100,7 @@ export class EventoListaComponent implements OnInit {
     this.eventoId = eventoId;
     this.modalRef = this.modalService.show(template, { class: 'modal-sm' });
   }
- 
+
   confirm(): void {
     this.modalRef?.hide();
     this.spinner.show();
@@ -109,8 +108,7 @@ export class EventoListaComponent implements OnInit {
     this.eventoService.deleteEvento(this.eventoId).subscribe({
       next: (result: any) => {
         console.log(result);
-        if (result.message == 'Deletado')
-        {
+        if (result.message == 'Deletado') {
           this.toastr.success('Evento deletado com sucesso!', 'Sucesso!');
           this.carregarEventos();
         }
@@ -120,13 +118,13 @@ export class EventoListaComponent implements OnInit {
       }
     }).add(() => this.spinner.hide());
   }
- 
+
   decline(): void {
     this.message = 'Declined!';
     this.modalRef?.hide();
   }
 
-  detalheEvento(id: number): void{
+  detalheEvento(id: number): void {
     this.router.navigate([`eventos/detalhe/${id}`]);
   }
 

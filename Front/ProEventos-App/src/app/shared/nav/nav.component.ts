@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
+import { AccountService } from '@app/services/account.service';
 import { CollapseModule } from 'ngx-bootstrap/collapse';
 import { BsDropdownModule } from 'ngx-bootstrap/dropdown';
 
@@ -14,13 +15,21 @@ import { BsDropdownModule } from 'ngx-bootstrap/dropdown';
 export class NavComponent implements OnInit {
   isCollapsed = true;
 
-  constructor(private router: Router) { }
+  constructor(
+    private router: Router,
+    public accountService: AccountService
+  ) { }
 
   ngOnInit() {
   }
 
+  logout(): void {
+    this.accountService.logout();
+    this.router.navigateByUrl('/user/login');
+  }
+
   showMenu(): boolean {
-    return this.router.url != '/user/login';
+    return this.accountService.currentUser$ !== null;
   }
 
 }

@@ -1,24 +1,20 @@
-import { AbstractControl, FormGroup } from "@angular/forms";
+import { AbstractControl, ValidationErrors, ValidatorFn, FormGroup } from "@angular/forms";
 
 export class ValidatorField {
-   static MustMatch(controlName: string, matchingControlName: string): any {
-      return (group: AbstractControl) => {
-         const formGroup = group as FormGroup;
-         const control = formGroup.controls[controlName]
-         const matchingControl = formGroup.controls[matchingControlName];
+  static MustMatch(controlName: string, matchingControlName: string): ValidatorFn {
+    return (group: AbstractControl): ValidationErrors | null => {
+      const formGroup = group as FormGroup;
+      const control = formGroup.controls[controlName];
+      const matchingControl = formGroup.controls[matchingControlName];
 
-         if (matchingControl.errors && !matchingControl.errors['mustMatch'])
-         {
-            return null;
-         }
+      // Verifica se os campos não são iguais e ajusta o erro
+      if (control.value !== matchingControl.value) {
+        matchingControl.setErrors({ mustMatch: true });
+      } else {
+        matchingControl.setErrors(null);
+      }
 
-         if(control.value != matchingControl.value){
-            matchingControl.setErrors({ mustMatch: true})
-         } else {
-            matchingControl.setErrors(null);
-         }
-
-         return null;
-      };
-   }
+      return null;
+    };
+  }
 }

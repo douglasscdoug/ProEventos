@@ -26,7 +26,7 @@ public class AccountService(
    {
       try
       {
-         var user = await UserManager.Users.SingleOrDefaultAsync(u => u.UserName == userUpdateDto.Username);
+         var user = await UserManager.Users.SingleOrDefaultAsync(u => u.UserName == userUpdateDto.UserName);
          if(user != null) return await SignInManager.CheckPasswordSignInAsync(user, password, false);
          
          return null;
@@ -37,7 +37,7 @@ public class AccountService(
       }
    }
 
-   public async Task<UserDto?> CreateAccountAsync(UserDto userDto)
+   public async Task<UserUpdateDto?> CreateAccountAsync(UserDto userDto)
    {
       try
       {
@@ -46,7 +46,7 @@ public class AccountService(
 
          if(result.Succeeded)
          {
-            var userToReturn = Mapper.Map<UserDto>(user);
+            var userToReturn = Mapper.Map<UserUpdateDto>(user);
             return userToReturn;
          }
 
@@ -78,14 +78,18 @@ public class AccountService(
    {
       try
       {
-         var user = await UserPersist.GetUserByUserNameAsync(userUpdateDto.Username);
+         var user = await UserPersist.GetUserByUserNameAsync(userUpdateDto.UserName);
          if(user == null) return null;
+
+         userUpdateDto.Id = user.Id;
 
          Mapper.Map(userUpdateDto, user);
 
-         var token = await UserManager.GeneratePasswordResetTokenAsync(user);
-
-         var result = await UserManager.ResetPasswordAsync(user, token, userUpdateDto.Password);
+         if(userUpdateDto.Password != null)
+         {
+            var token = await UserManager.GeneratePasswordResetTokenAsync(user);
+            await UserManager.ResetPasswordAsync(user, token, userUpdateDto.Password);
+         }
 
          UserPersist.Update(user);
 
