@@ -49,16 +49,12 @@ export class EventoListaComponent implements OnInit {
 
   ngOnInit() {
     this.pagination = { currentPage: 1, itemsPerPage: 3 } as Pagination;
-    this.carregarEventos();
-  }
 
-  public filtrarEventos(evt: any): void {
-    if (this.termoBuscaChanged.observers.length === 0) {
-      this.termoBuscaChanged
+    this.termoBuscaChanged
         .pipe(debounceTime(1000))
         .subscribe((filtrarPor) => {
           this.spinner.show();
-          this.eventoService.getEventos(this.pagination.currentPage, this.pagination.itemsPerPage, evt.value).subscribe({
+          this.eventoService.getEventos(this.pagination.currentPage, this.pagination.itemsPerPage, filtrarPor).subscribe({
             next: (response: PaginatedResult<Evento[]>) => {
               this.eventos = response.result ?? [];
               this.pagination = response.pagination ?? new Pagination;
@@ -69,7 +65,11 @@ export class EventoListaComponent implements OnInit {
             }
           }).add(() => this.spinner.hide());
         });
-    }
+
+    this.carregarEventos();
+  }
+
+  public filtrarEventos(evt: any): void {
     this.termoBuscaChanged.next(evt.value);
   }
 
