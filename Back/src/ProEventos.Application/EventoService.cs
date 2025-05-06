@@ -85,7 +85,7 @@ public class EventoService(IGeralPersist geralPersist, IEventoPersist eventoPers
       }
    }
 
-   public async Task<PageList<EventoDto>> GetAllEventosAsync(int userId, PageParams pageParams, bool includePalestrantes = false)
+   public async Task<PageList<EventoDto>?> GetAllEventosAsync(int userId, PageParams pageParams, bool includePalestrantes = false)
    {
       try
       {

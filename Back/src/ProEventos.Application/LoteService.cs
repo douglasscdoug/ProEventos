@@ -95,7 +95,7 @@ public class LoteService(IGeralPersist _geralPersist, ILotePersist _lotePersist,
 
                   Mapper.Map(model, lote);
 
-                  GeralPersist.Update<Lote>(lote);
+                  if(lote != null) GeralPersist.Update(lote);
 
                  await GeralPersist.SaveChangesAsync();
                }

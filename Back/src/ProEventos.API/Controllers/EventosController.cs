@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ProEventos.API.Extensions;
+using ProEventos.API.Helpers;
 using ProEventos.Application.Contratos;
 using ProEventos.Application.Dtos;
 using ProEventos.Persistence.Models;
@@ -12,13 +13,14 @@ namespace ProEventos.API.Controllers;
 [Route("api/[controller]")]
 public class EventosController(
     IEventoService _eventoService,
-    IWebHostEnvironment hostEnvironment,
+    IUtil _util,
     IAccountService _accountService
 ) : ControllerBase
 {
     public IEventoService EventoService { get; } = _eventoService;
-    public IWebHostEnvironment HostEnvironment { get; } = hostEnvironment;
+    public IUtil Util { get; } = _util;
     public IAccountService AccountService { get; } = _accountService;
+    private readonly string _destino = "Images";
 
     [HttpGet]
     public async Task<IActionResult> Get([FromQuery]PageParams pageParams)
@@ -85,9 +87,9 @@ public class EventosController(
 
             if (file.Length > 0)
             {
-                if (evento.ImagemUrl != null) DeleteImage(evento.ImagemUrl);
+                if (evento.ImagemUrl != null) Util.DeleteImage(evento.ImagemUrl, _destino);
 
-                evento.ImagemUrl = await SaveImage(file);
+                evento.ImagemUrl = await Util.SaveImage(file, _destino);
             }
 
             var eventoRetorno = await EventoService.UpdateEvento(User.GetUserId(), eventoId, evento);
@@ -97,7 +99,7 @@ public class EventosController(
         catch (Exception ex)
         {
             return this.StatusCode(StatusCodes.Status500InternalServerError,
-                $"Erro ao tentar recuperar eventos. Erro: {ex.Message}");
+                $"Erro ao tentar fazer upload de imagem do evento. Erro: {ex.Message}");
         }
     }
 
@@ -128,7 +130,7 @@ public class EventosController(
 
             if (await EventoService.DeleteEvento(User.GetUserId(), id))
             {
-                DeleteImage(evento.ImagemUrl ?? throw new Exception("Url da Imagem inválida"));
+                Util.DeleteImage(evento.ImagemUrl ?? throw new Exception("Url da Imagem inválida"), _destino);
                 return Ok(new { message = "Deletado" });
             }
             else
@@ -141,31 +143,5 @@ public class EventosController(
             return this.StatusCode(StatusCodes.Status500InternalServerError,
                 $"Erro ao tentar deletar os eventos. Erro: {ex.Message}");
         }
-    }
-
-    [NonAction]
-    public async Task<string> SaveImage(IFormFile imageFile)
-    {
-        string imageName = new string(Path.GetFileNameWithoutExtension(imageFile.FileName).Take(10).ToArray()).Replace(" ", "-");
-
-        imageName = $"{imageName}{DateTime.UtcNow.ToString("yymmssfff")}{Path.GetExtension(imageFile.FileName)}";
-
-        var imagePath = Path.Combine(HostEnvironment.ContentRootPath, @"Resources/Images", imageName);
-
-        using (var fileStream = new FileStream(imagePath, FileMode.Create))
-        {
-            await imageFile.CopyToAsync(fileStream);
-        }
-
-        return imageName;
-    }
-
-    [NonAction]
-    public void DeleteImage(string imageName)
-    {
-        var imagePath = Path.Combine(HostEnvironment.ContentRootPath, @"Resources/Images", imageName);
-
-        if (System.IO.File.Exists(imagePath))
-            System.IO.File.Delete(imagePath);
     }
 }

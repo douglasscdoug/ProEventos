@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using ProEventos.API.Extensions;
+using ProEventos.API.Helpers;
 using ProEventos.Application.Contratos;
 using ProEventos.Application.Dtos;
 
@@ -11,10 +12,12 @@ namespace ProEventos.API.Controllers
     [Authorize]
     [Route("api/[controller]")]
     [ApiController]
-    public class AccountController(IAccountService accountService, ITokenService tokenService) : ControllerBase
+    public class AccountController(IAccountService accountService, ITokenService tokenService, IUtil _util) : ControllerBase
     {
         public IAccountService AccountService { get; } = accountService;
         public ITokenService TokenService { get; } = tokenService;
+        public IUtil Util { get; } = _util;
+        private readonly string _destino = "Perfil";
 
         [HttpGet("GetUser")]
         public async Task<IActionResult> GetUser()
@@ -121,5 +124,33 @@ namespace ProEventos.API.Controllers
                 $"Erro ao tentar atualizar usuario. Erro: {ex.Message}");
             }
         }
+
+        [HttpPost("upload-image")]
+    public async Task<IActionResult> UploadImage()
+    {
+        try
+        {
+            var user = await AccountService.GetUserByUserNameAsync(User.GetUserName());
+            if (user == null) return NoContent();
+
+            var file = Request.Form.Files[0];
+
+            if (file.Length > 0)
+            {
+                if (user.ImagemUrl != null) Util.DeleteImage(user.ImagemUrl, _destino);
+
+                user.ImagemUrl = await Util.SaveImage(file, _destino);
+            }
+
+            var userRetorno = await AccountService.UpdateAccount(user);
+
+            return Ok(userRetorno);
+        }
+        catch (Exception ex)
+        {
+            return this.StatusCode(StatusCodes.Status500InternalServerError,
+                $"Erro ao tentar realizar upload de foto de perfil. Erro: {ex.Message}");
+        }
+    }
     }
 }
