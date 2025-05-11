@@ -32,4 +32,19 @@ export class NavComponent implements OnInit {
     return this.accountService.currentUser$ !== null;
   }
 
+  toggleMenu(): void {
+    this.isCollapsed = !this.isCollapsed;
+  }
+  
+  closeMenu(): void {
+    const focused = document.activeElement as HTMLElement;
+    const menu = document.getElementById('navbarNav');
+  
+    if (menu?.contains(focused)) {
+      focused.blur(); // Remove o foco de qualquer item dentro do menu
+    }
+  
+    this.isCollapsed = true;
+  }
+  
 }

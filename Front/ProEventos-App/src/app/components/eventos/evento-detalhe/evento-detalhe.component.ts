@@ -18,12 +18,13 @@ import { LoteService } from '@app/services/lote.service';
 import { BsModalRef, BsModalService } from 'ngx-bootstrap/modal';
 import { environment } from 'src/environments/environment';
 import { DateTimeFormatPipe } from "../../../helpers/DateTimeFormat.pipe";
+import { RedesSociaisComponent } from "../../redes-sociais/redes-sociais.component";
 defineLocale('pt-br', ptBrLocale);
 
 @Component({
   selector: 'app-evento-detalhe',
   templateUrl: './evento-detalhe.component.html',
-  imports: [ReactiveFormsModule, CommonModule, BsDatepickerModule, NgxCurrencyDirective, DateTimeFormatPipe],
+  imports: [ReactiveFormsModule, CommonModule, BsDatepickerModule, NgxCurrencyDirective, DateTimeFormatPipe, RedesSociaisComponent],
   styleUrls: ['./evento-detalhe.component.scss']
 })
 export class EventoDetalheComponent implements OnInit {
@@ -33,7 +34,7 @@ export class EventoDetalheComponent implements OnInit {
   evento = {} as Evento;
   estadoSalvar = 'post';
   loteAtual = {id: 0, nome: '', indice: 0};
-  imagemURL = 'assets/upload.png';
+  imagemURL = 'assets/images/upload.png';
   file!: File;
 
   get modoEditar(): boolean {

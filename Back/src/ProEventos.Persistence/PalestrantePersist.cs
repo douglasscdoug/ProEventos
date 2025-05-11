@@ -15,7 +15,7 @@ public class PalestrantePersist(ProEventosContext _context) : GeralPersist(_cont
          if(includeEventos)
          {
             query = query
-               .Include(p => p.PalestrantesEventos)
+               .Include(p => p.PalestrantesEventos!)
                .ThenInclude(pe => pe.Evento);
          }
 
@@ -39,7 +39,7 @@ public class PalestrantePersist(ProEventosContext _context) : GeralPersist(_cont
          if(includeEventos)
          {
             query = query
-               .Include(p => p.PalestrantesEventos)
+               .Include(p => p.PalestrantesEventos!)
                .ThenInclude(pe => pe.Evento);
          }
 

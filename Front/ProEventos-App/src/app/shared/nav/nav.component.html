@@ -3,47 +3,63 @@
     <a class="navbar-brand" routerLink="home">
       <i class="fa fa-users mb-2"></i>
     </a>
-    <button class="navbar-toggler" type="button" (click)="isCollapsed = !isCollapsed" data-bs-target="#navbarNav"
-      aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+    <button
+      class="navbar-toggler"
+      type="button"
+      (click)="toggleMenu()"
+      aria-controls="navbarNav"
+      [attr.aria-expanded]="!isCollapsed"
+      aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
-    <div class="collapse navbar-collapse" [collapse]="isCollapsed" [isAnimated]="true" id="navbarNav">
+
+    <div
+      class="collapse navbar-collapse"
+      [collapse]="isCollapsed"
+      [isAnimated]="true"
+      id="navbarNav">
       <ul class="navbar-nav me-auto">
         <ng-container *ngIf="(accountService.currentUser$ | async) !== null">
           <li class="nav-item">
             <a class="nav-link active" aria-current="page" routerLink="dashboard"
-              routerLinkActive="active">Dashboard</a>
+               routerLinkActive="active" (click)="closeMenu()">Dashboard</a>
           </li>
           <li class="nav-item">
             <a class="nav-link active" aria-current="page" routerLink="eventos/lista"
-              routerLinkActive="active">Eventos</a>
+               routerLinkActive="active" (click)="closeMenu()">Eventos</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" routerLink="palestrantes" routerLinkActive="active">Palestrantes</a>
+            <a class="nav-link" routerLink="palestrantes"
+               routerLinkActive="active" (click)="closeMenu()">Palestrantes</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" routerLink="contatos" routerLinkActive="active">Contatos</a>
+            <a class="nav-link" routerLink="contatos"
+               routerLinkActive="active" (click)="closeMenu()">Contatos</a>
           </li>
         </ng-container>
       </ul>
+
       <div *ngIf="(accountService.currentUser$ | async) === null" class="navbar-nav me-3 d-xs-none d-none d-md-block">
-        <a class="btn btn-light me-2 border" routerLink="/user/login">Entrar</a>
-        <a class="btn btn-warning" routerLink="/user/registration">Me Cadastrar</a>
+        <a class="btn btn-light me-2 border" routerLink="/user/login" (click)="closeMenu()">Entrar</a>
+        <a class="btn btn-warning" routerLink="/user/registration" (click)="closeMenu()">Me Cadastrar</a>
       </div>
+
       <ul *ngIf="(accountService.currentUser$ | async) !== null" class="navbar-nav ms-auto">
         <li class="nav-item dropdown" dropdown *ngIf="(accountService.currentUser$ | async) as User">
-          <a dropdownToggle class="nav-link dropdown-toggle" style="cursor: pointer;" id="navbarDropdownMenuLink"
-            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            {{User.nome | titlecase}}
+          <a
+            dropdownToggle
+            class="nav-link dropdown-toggle"
+            style="cursor: pointer;"
+            id="navbarDropdownMenuLink"
+            data-toggle="dropdown"
+            aria-haspopup="true"
+            aria-expanded="false">
+            {{ User.nome | titlecase }}
           </a>
           <div *dropdownMenu class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdownMenuLink">
-            <a class="dropdown-item" routerLink="/user/perfil">
-              Perfil
-            </a>
+            <a class="dropdown-item" routerLink="/user/perfil" (click)="closeMenu()">Perfil</a>
             <div role="separator" class="divider"></div>
-            <a (click)="logout()" class="dropdown-item" style="cursor: pointer;">
-              Sair
-            </a>
+            <a (click)="logout(); closeMenu()" class="dropdown-item" style="cursor: pointer;">Sair</a>
           </div>
         </li>
       </ul>

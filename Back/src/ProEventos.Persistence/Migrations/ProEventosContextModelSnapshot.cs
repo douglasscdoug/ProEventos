@@ -137,7 +137,7 @@ namespace ProEventos.Persistence.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Eventos");
+                    b.ToTable("Eventos", (string)null);
                 });
 
             modelBuilder.Entity("ProEventos.Domain.Identity.Role", b =>
@@ -296,7 +296,7 @@ namespace ProEventos.Persistence.Migrations
 
                     b.HasIndex("EventoId");
 
-                    b.ToTable("Lotes");
+                    b.ToTable("Lotes", (string)null);
                 });
 
             modelBuilder.Entity("ProEventos.Domain.Palestrante", b =>
@@ -315,7 +315,7 @@ namespace ProEventos.Persistence.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Palestrantes");
+                    b.ToTable("Palestrantes", (string)null);
                 });
 
             modelBuilder.Entity("ProEventos.Domain.PalestranteEvento", b =>
@@ -330,7 +330,7 @@ namespace ProEventos.Persistence.Migrations
 
                     b.HasIndex("PalestranteId");
 
-                    b.ToTable("PalestrantesEventos");
+                    b.ToTable("PalestrantesEventos", (string)null);
                 });
 
             modelBuilder.Entity("ProEventos.Domain.RedeSocial", b =>
@@ -359,7 +359,7 @@ namespace ProEventos.Persistence.Migrations
 
                     b.HasIndex("PalestranteId");
 
-                    b.ToTable("RedesSociais");
+                    b.ToTable("RedesSociais", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<int>", b =>

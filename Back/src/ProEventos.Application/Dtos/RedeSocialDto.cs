@@ -12,5 +12,6 @@ public class RedeSocialDto
    [JsonIgnore]
    public EventoDto ? Evento { get; set; }
    public int ? PalestranteId { get; set; }
+   [JsonIgnore]
    public PalestranteDto ? Palestrante { get; set; }
 }

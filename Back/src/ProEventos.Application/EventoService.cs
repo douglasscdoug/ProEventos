@@ -110,7 +110,7 @@ public class EventoService(IGeralPersist geralPersist, IEventoPersist eventoPers
       }
    }
 
-   public async Task<EventoDto?> GetEventoByIdAsync(int userId, int eventoId, bool includePalestrantes = false)
+   public async Task<EventoDto?> GetEventoByIdAsync(int userId, int eventoId, bool includePalestrantes = true)
    {
       try
       {

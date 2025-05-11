@@ -27,8 +27,12 @@ public class ProEventosContext(DbContextOptions<ProEventosContext> options) : Id
             userRole.HasOne(ur => ur.User).WithMany(r => r.UserRoles).HasForeignKey(ur => ur.UserId).IsRequired();
         });
 
-        modelBuilder.Entity<PalestranteEvento>()
-            .HasKey(PE => new {PE.EventoId, PE.PalestranteId});
+        modelBuilder.Entity<PalestranteEvento>(palestranteEvento =>
+        {
+            palestranteEvento.HasKey(pe => new {pe.EventoId, pe.PalestranteId});
+            palestranteEvento.HasOne(pe =>pe.Evento).WithMany(e => e.PalestrantesEventos).HasForeignKey(pe => pe.EventoId);
+            palestranteEvento.HasOne(pe => pe.Palestrante).WithMany(p => p.PalestrantesEventos).HasForeignKey(pe => pe.PalestranteId);
+        });
 
         modelBuilder.Entity<Evento>()
             .HasMany(e => e.RedesSociais)

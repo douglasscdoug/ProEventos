@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
-import { AbstractControl, AbstractControlOptions, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { AbstractControl, AbstractControlOptions, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { ValidatorField } from '@app/helpers/ValidatorField';
 import { User } from '@app/models/identity/User';
@@ -9,7 +9,7 @@ import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-registration',
-  imports: [RouterLink, ReactiveFormsModule, CommonModule],
+  imports: [RouterLink, ReactiveFormsModule, CommonModule, FormsModule],
   templateUrl: './registration.component.html',
   styleUrl: './registration.component.scss'
 })
@@ -46,6 +46,7 @@ export class RegistrationComponent implements OnInit {
   }
 
   public register(): void {
+    console.log('Tentando registrar...');
     const { confirmaPassword, ...user } = this.registrationForm.value;
     this.accountService.register(user).subscribe({
       next: () => {this.router.navigateByUrl('/dashboard')},

@@ -1,6 +1,6 @@
 export class UserUpdate {
    titulo?: string;
-   username?: string;
+   userName?: string;
    nome?: string;
    sobrenome?: string;
    email?: string;
@@ -8,4 +8,5 @@ export class UserUpdate {
    funcao?: string;
    descricao?: string;
    password?: string;
+   imagemUrl?: string;
 }

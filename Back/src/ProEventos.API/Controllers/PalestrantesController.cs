@@ -39,7 +39,7 @@ namespace ProEventos.API.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetPalestrantes(int id)
+        public async Task<IActionResult> GetPalestrantes()
         {
             try
             {

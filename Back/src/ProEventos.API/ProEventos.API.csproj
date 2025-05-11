@@ -26,6 +26,7 @@
     <Folder Include="Data\" />
     <Folder Include="Resources\" />
     <Folder Include="Resources\Images\" />
+    <Folder Include="Resources\Perfil\" />
   </ItemGroup>
 
 </Project>
