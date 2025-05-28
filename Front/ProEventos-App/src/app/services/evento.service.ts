@@ -50,6 +50,10 @@ export class EventoService {
     return this.http.put<Evento>(`${this.baseURL}/${evento.id}`, evento).pipe(take(1));
   }
 
+  public salvarPalestranteDoEvento(eventoId: number, palestrantesDoEvento: { eventoId: number, palestranteId: number}[]): Observable<string> {
+    return this.http.put<string>(`${this.baseURL}/palestrantes/${eventoId}`, palestrantesDoEvento).pipe(take(1));
+  }
+
   public deleteEvento(id: number): Observable<any> {
     return this.http.delete(`${this.baseURL}/${id}`).pipe(take(1));
   }

@@ -27,7 +27,7 @@ public class EventosController(
     {
         try
         {
-            var eventos = await EventoService.GetAllEventosAsync(User.GetUserId(), pageParams, true);
+            var eventos = await EventoService.GetAllEventosAsync(User.GetUserId(), pageParams, false);
             if (eventos == null) return NoContent();
 
             Response.AddPagination(eventos.CurrentPage, eventos.PageSize, eventos.TotalCount, eventos.TotalPages);
@@ -80,7 +80,7 @@ public class EventosController(
     {
         try
         {
-            var evento = await EventoService.GetEventoByIdAsync(User.GetUserId(), eventoId);
+            var evento = await EventoService.GetEventoByIdAsync(User.GetUserId(), eventoId, false);
             if (evento == null) return NoContent();
 
             var file = Request.Form.Files[0];
@@ -120,12 +120,30 @@ public class EventosController(
         }
     }
 
+    [HttpPut("palestrantes/{eventoId}")]
+    public async Task<IActionResult> PutPalestrantes(int eventoId, List<PalestranteEventoDto> palestrantes)
+    {
+        try
+        {
+            var resultado = await EventoService.AdicionarPalestrantesAoEvento(User.GetUserId(), eventoId, palestrantes);
+
+            if (!resultado) throw new Exception("Erro ao tentar adicionar palestrantes");
+
+            return Ok(new { message = "Adicionado"});
+        }
+        catch (Exception ex)
+        {
+            return this.StatusCode(StatusCodes.Status500InternalServerError,
+                $"Erro ao tentar adicionar palestrantes ao evento. Erro: {ex.Message}");
+        }
+    }
+
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(int id)
     {
         try
         {
-            var evento = await EventoService.GetEventoByIdAsync(User.GetUserId(), id);
+            var evento = await EventoService.GetEventoByIdAsync(User.GetUserId(), id, false);
             if (evento == null) return NoContent();
 
             if (await EventoService.DeleteEvento(User.GetUserId(), id))

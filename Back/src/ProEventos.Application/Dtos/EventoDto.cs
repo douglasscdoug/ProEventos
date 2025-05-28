@@ -41,5 +41,5 @@ public class EventoDto
    public UserDto ? UserDto { get; set; }
    public IEnumerable<LoteDto> ? Lotes { get; set; }
    public IEnumerable<RedeSocialDto> ? RedesSociais { get; set; }
-   public IEnumerable<PalestranteDto>? Palestrantes { get; set; }
+   public List<PalestranteDto> Palestrantes { get; set; } = [];
 }

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, TemplateRef } from '@angular/core';
+import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { AbstractControl, FormArray, FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 
@@ -19,6 +19,8 @@ import { BsModalRef, BsModalService } from 'ngx-bootstrap/modal';
 import { environment } from 'src/environments/environment';
 import { DateTimeFormatPipe } from "../../../helpers/DateTimeFormat.pipe";
 import { RedesSociaisComponent } from "../../redes-sociais/redes-sociais.component";
+import { PalestranteService } from '@app/services/palestrante.service';
+import { Palestrante } from '@app/models/Palestrante';
 defineLocale('pt-br', ptBrLocale);
 
 @Component({
@@ -36,6 +38,10 @@ export class EventoDetalheComponent implements OnInit {
   loteAtual = {id: 0, nome: '', indice: 0};
   imagemURL = 'assets/images/upload.png';
   file!: File;
+  palestrantesDiponiveis: Palestrante[] = [];
+  @ViewChild('modalPalestrantes') modalPalestrantes!: TemplateRef<any>;
+  bsModalRef!: BsModalRef;
+  palestrantesSelecionados: Palestrante[] = [];
 
   get modoEditar(): boolean {
     return this.estadoSalvar === 'put';
@@ -76,7 +82,8 @@ export class EventoDetalheComponent implements OnInit {
     private toastr: ToastrService,
     private loteService: LoteService,
     private modalService: BsModalService,
-    private router: Router
+    private router: Router,
+    private palestranteService: PalestranteService
   ) {
     this.localeService.use('pt-br');
 
@@ -123,6 +130,7 @@ export class EventoDetalheComponent implements OnInit {
       this.eventoService.getEventoById(this.eventoId).subscribe({
         next: (evento: Evento) => {
           this.evento = { ...evento };
+          this.palestrantesSelecionados = evento.palestrantes;
 
           if (this.evento.dataEvento) {
             this.evento.dataEvento = new Date(this.evento.dataEvento);  // Converte para Date
@@ -276,6 +284,57 @@ export class EventoDetalheComponent implements OnInit {
       },
       error: (error: any) => {
         this.toastr.error('Erro ao fazer upload da imagem', 'Erro!!');
+        console.error(error);
+      }
+    }).add(() => this.spinner.hide());
+  }
+
+  public adicionarPalestrante(): void {
+    this.palestranteService.getPalestrantes().subscribe({
+      next: (palestrantesResponse) => {
+        this.palestrantesDiponiveis = palestrantesResponse.result ?? [];
+        this.abrirModalPalestrantes();
+      },
+      error: (erro: any) => this.toastr.error('Erro ao carregar palestrantes', 'Erro!')
+    })
+  }
+
+  public abrirModalPalestrantes(): void {
+    this.bsModalRef = this.modalService.show(this.modalPalestrantes);
+  }
+
+  public selecionarPalestrante(palestrante: Palestrante): void {
+    if (!this.palestrantesSelecionados.some(p => p.id === palestrante.id)) {
+      this.palestrantesSelecionados.push(palestrante);
+    }
+    this.bsModalRef.hide();
+  }
+
+  public getImagemUrl(imagemName: string | any): string {
+    if(imagemName) 
+      return environment.apiUrl + `resources/perfil/${imagemName}`;
+    else
+      return './assets/images/perfil.png';
+  }
+
+  public removerPalestrante(palestranteId: number): void {
+    this.palestrantesSelecionados = this.palestrantesSelecionados.filter(
+      p => p.id !== palestranteId
+    );
+  }
+
+  public salvarPalestrantes(): void {
+    this.spinner.show();
+    
+    const payloadPalestrante = this.palestrantesSelecionados.map(p => ({
+      eventoId: this.eventoId,
+      palestranteId: p.id
+    }));
+
+    this.eventoService.salvarPalestranteDoEvento(this.eventoId, payloadPalestrante).subscribe({
+      next: () => this.toastr.success('Palestrantes adicionados com sucesso!', 'Sucesso!'),
+      error: (error: any) => {
+        this.toastr.error('Erro ao tentar adicionar palestrante', 'Erro!');
         console.error(error);
       }
     }).add(() => this.spinner.hide());

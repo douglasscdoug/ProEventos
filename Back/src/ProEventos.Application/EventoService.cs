@@ -3,6 +3,7 @@ using AutoMapper;
 using ProEventos.Application.Contratos;
 using ProEventos.Application.Dtos;
 using ProEventos.Domain;
+using ProEventos.Persistence;
 using ProEventos.Persistence.Contratos;
 using ProEventos.Persistence.Models;
 
@@ -25,7 +26,7 @@ public class EventoService(IGeralPersist geralPersist, IEventoPersist eventoPers
 
          if (await GeralPersist.SaveChangesAsync())
          {
-            var eventoRetorno = await EventoPersist.GetEventoByIdAsync(evento.UserId, evento.Id, false);
+            var eventoRetorno = await EventoPersist.GetEventoByIdAsync(evento.UserId, evento.Id, true);
             return Mapper.Map<EventoDto>(eventoRetorno);
          }
 
@@ -52,7 +53,7 @@ public class EventoService(IGeralPersist geralPersist, IEventoPersist eventoPers
             GeralPersist.Update<Evento>(evento);
 
             if(await GeralPersist.SaveChangesAsync()){
-               var eventoRetorno = await EventoPersist.GetEventoByIdAsync(userId, evento.Id, false);
+               var eventoRetorno = await EventoPersist.GetEventoByIdAsync(userId, evento.Id, true);
                return Mapper.Map<EventoDto>(eventoRetorno);
             }
             return null;
@@ -75,6 +76,34 @@ public class EventoService(IGeralPersist geralPersist, IEventoPersist eventoPers
          else
          {
             GeralPersist.Delete<Evento>(evento);
+         }
+
+         return await GeralPersist.SaveChangesAsync();
+      }
+      catch (Exception ex)
+      {
+         throw new Exception(ex.Message);
+      }
+   }
+
+   public async Task<bool> AdicionarPalestrantesAoEvento(int userId, int eventoId, List<PalestranteEventoDto> palestrantes)
+   {
+      try
+      {
+         var evento = await EventoPersist.GetEventoByIdAsync(userId, eventoId, true);
+
+         if (evento == null) throw new Exception("Evento não encontrado");
+
+         var palestrantesExistentes = await EventoPersist.GetPalestrantesByEventoIdAsync(eventoId);
+         if (palestrantesExistentes.Any()) GeralPersist.DeleteRange(palestrantesExistentes.ToArray());
+
+         foreach (var palestrante in palestrantes)
+         {
+            GeralPersist.Add(new PalestranteEvento
+            {
+               EventoId = eventoId,
+               PalestranteId = palestrante.PalestranteId
+            });
          }
 
          return await GeralPersist.SaveChangesAsync();
