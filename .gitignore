@@ -60,3 +60,12 @@ obj/
 
 .DS_Store
 Thumbs.db
+
+# =========================
+# Imagens
+# =========================
+
+Back/src/ProEventos.API/Resources/Images/*
+!Back/src/ProEventos.API/Resources/Images/.gitkeep
+Back/src/ProEventos.API/Resources/Perfil/*
+!Back/src/ProEventos.API/Resources/Perfil/.gitkeep
