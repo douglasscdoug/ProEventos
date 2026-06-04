@@ -2,7 +2,6 @@ using Microsoft.EntityFrameworkCore;
 using ProEventos.Domain;
 using ProEventos.Persistence.Contexts;
 using ProEventos.Persistence.Contratos;
-using SQLitePCL;
 
 namespace ProEventos.Persistence;
 

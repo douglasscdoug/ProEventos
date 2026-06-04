@@ -3,7 +3,6 @@ using ProEventos.Domain;
 using ProEventos.Persistence.Contexts;
 using ProEventos.Persistence.Contratos;
 using ProEventos.Persistence.Models;
-using SQLitePCL;
 
 namespace ProEventos.Persistence;
 

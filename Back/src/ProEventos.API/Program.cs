@@ -22,7 +22,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 
 builder.Services.AddDbContext<ProEventosContext>(
-    options => options.UseSqlite(builder.Configuration.GetConnectionString("Default"))
+    options => options.UseSqlServer(builder.Configuration.GetConnectionString("Default"))
 );
 
 builder.Services.AddControllers();
