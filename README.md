@@ -43,6 +43,10 @@ Sistema web para gerenciamento de eventos desenvolvido com **Angular** e **.NET 
 
 ![Tela de Login](./screenshots/login.png)
 
+### Cadastro de usuário
+
+![Cadastro de Usuário](./screenshots/registration.png)
+
 ### Listagem de Eventos
 
 ![Listagem de Eventos](./screenshots/eventos.png)
@@ -65,6 +69,15 @@ Sistema web para gerenciamento de eventos desenvolvido com **Angular** e **.NET 
 * Angular CLI
 * .NET SDK
 * SQL Server
+
+### Configuração
+
+Antes de executar o projeto, configure os User Secrets:
+
+```bash
+dotnet user-secrets set "TokenKey" "SuaChaveJWT"
+dotnet user-secrets set "ConnectionStrings:Default" "SuaConnectionString"
+```
 
 ### Front-end
 
