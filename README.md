@@ -1,59 +1,192 @@
-# ProEventos - Curso da Udemy
+# ProEventos
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 19.1.7.
+Sistema web para gerenciamento de eventos desenvolvido com **Angular** e **.NET Web API**, permitindo o cadastro, consulta e gerenciamento de eventos, palestrantes e participantes.
 
-## Development server
+## 🚀 Tecnologias Utilizadas
 
-To start a local development server, run:
+### Front-end
+
+* Angular
+* TypeScript
+* Bootstrap
+* RxJS
+
+### Back-end
+
+* ASP.NET Core Web API
+* Entity Framework Core
+* SQL Server
+* AutoMapper
+
+### Autenticação
+
+* JWT (JSON Web Token)
+
+---
+
+## 📋 Funcionalidades
+
+* Autenticação de usuários
+* Cadastro e gerenciamento de eventos
+* Cadastro de palestrantes
+* Upload de imagens para eventos
+* Consulta e pesquisa de eventos
+* Gerenciamento de participantes
+* Controle de acesso através de autenticação JWT
+* Interface responsiva
+
+---
+
+## 📸 Screenshots
+
+### Tela de Login
+
+![Tela de Login](./screenshots/login.png)
+
+### Listagem de Eventos
+
+![Listagem de Eventos](./screenshots/eventos.png)
+
+### Cadastro/Edição de Evento
+
+![Cadastro de Evento](./screenshots/cadastro-evento.png)
+
+### Detalhes do Evento
+
+![Detalhes do Evento](./screenshots/detalhes-evento.png)
+
+---
+
+## ⚙️ Como Executar o Projeto
+
+### Pré-requisitos
+
+* Node.js
+* Angular CLI
+* .NET SDK
+* SQL Server
+
+### Front-end
 
 ```bash
+npm install
 ng serve
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+A aplicação estará disponível em:
 
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
-
-```bash
-ng generate component component-name
+```text
+http://localhost:4200
 ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+### Back-end
 
 ```bash
-ng generate --help
+dotnet restore
+dotnet run
 ```
 
-## Building
+---
 
-To build the project run:
+## 📁 Estrutura do Projeto
 
-```bash
-ng build
+```text
+src/
+ ├── app/
+ │   ├── components
+ │   ├── services
+ │   ├── models
+ │   ├── guards
+ │   └── interceptors
+ ├── assets
+ └── environments
 ```
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+---
 
-## Running unit tests
+## 🎯 Objetivo do Projeto
 
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
+Este projeto foi desenvolvido com foco em aprendizado e aplicação prática de conceitos modernos de desenvolvimento web, incluindo:
 
-```bash
-ng test
-```
+* Arquitetura SPA com Angular
+* Consumo de APIs REST
+* Autenticação e autorização com JWT
+* Boas práticas de desenvolvimento
+* Integração entre front-end e back-end
+* Persistência de dados com Entity Framework Core
 
-## Running end-to-end tests
+---
 
-For end-to-end (e2e) testing, run:
+## 📚 Créditos
 
-```bash
-ng e2e
-```
+Este projeto foi baseado no curso desenvolvido por Vinícius Andrade (VS Andrade).
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+- GitHub: https://github.com/vsandrade
 
-## Additional Resources
+Além do conteúdo original, foram realizadas customizações e melhorias próprias para fins de estudo e evolução técnica.
 
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+---
+
+## 🔨 Melhorias Realizadas
+
+Além da implementação original proposta no curso, o projeto recebeu evoluções com foco em boas práticas, segurança e manutenção do código.
+
+### Tratamento Global de Exceções
+
+* Implementação de middleware para tratamento centralizado de exceções.
+* Padronização das respostas de erro da API.
+* Redução da duplicação de código em controllers e serviços.
+* Melhor experiência para o consumidor da API.
+
+### Autenticação e Segurança
+
+* Aperfeiçoamento do fluxo de autenticação utilizando JWT.
+* Implementação de Refresh Tokens.
+* Melhoria do processo de logout com invalidação segura de sessões.
+* Renovação automática de tokens sem necessidade de novo login.
+
+### Melhorias Gerais
+
+* Refatorações para melhor organização do código.
+* Atualização de dependências e pacotes.
+* Ajustes de interface e experiência do usuário.
+
+---
+
+## 🚀 Próximas Melhorias
+
+Funcionalidades planejadas para evolução contínua do projeto:
+
+* Implementação de testes unitários
+* Implementação de testes de integração
+* Pipeline de CI/CD
+* Containerização com Docker
+* Aprimoramento da experiência do usuário (UX/UI)
+* Documentação da API com Swagger mais detalhada
+
+---
+
+## 🎯 Conceitos Aplicados
+
+- ASP.NET Core Web API
+- Angular
+- Entity Framework Core
+- JWT Authentication
+- Refresh Tokens
+- Middleware para tratamento de exceções
+- AutoMapper
+- Repository Pattern
+- Upload de arquivos
+- API RESTful
+- SQL Server
+- Reactive Forms
+- Guards e Interceptors
+
+---
+
+## 👨‍💻 Autor
+
+Douglas Cabral
+
+* GitHub: https://github.com/douglasscdoug
+* LinkedIn: https://www.linkedin.com/in/douglas-cabral-531a49165/
