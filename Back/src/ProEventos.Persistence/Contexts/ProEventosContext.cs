@@ -30,18 +30,35 @@ public class ProEventosContext(DbContextOptions<ProEventosContext> options) : Id
         modelBuilder.Entity<PalestranteEvento>(palestranteEvento =>
         {
             palestranteEvento.HasKey(pe => new {pe.EventoId, pe.PalestranteId});
-            palestranteEvento.HasOne(pe =>pe.Evento).WithMany(e => e.PalestrantesEventos).HasForeignKey(pe => pe.EventoId);
-            palestranteEvento.HasOne(pe => pe.Palestrante).WithMany(p => p.PalestrantesEventos).HasForeignKey(pe => pe.PalestranteId);
+            palestranteEvento.HasOne(pe =>pe.Evento)
+                .WithMany(e => e.PalestrantesEventos)
+                .HasForeignKey(pe => pe.EventoId)
+                .OnDelete(DeleteBehavior.Restrict);
+            palestranteEvento.HasOne(pe => pe.Palestrante)
+                .WithMany(p => p.PalestrantesEventos)
+                .HasForeignKey(pe => pe.PalestranteId)
+                .OnDelete(DeleteBehavior.Restrict);
         });
 
-        modelBuilder.Entity<Evento>()
-            .HasMany(e => e.RedesSociais)
-            .WithOne(rs => rs.Evento)
-            .OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<Lote>()
+            .HasOne(l => l.Evento)
+            .WithMany(e => e.Lotes)
+            .HasForeignKey(l => l.EventoId)
+            .OnDelete(DeleteBehavior.Restrict);
 
-        modelBuilder.Entity<Palestrante>()
-            .HasMany(p => p.RedesSociais)
-            .WithOne(rs => rs.Palestrante)
-            .OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<Lote>().Property(l => l.Preco).HasPrecision(18, 2);
+
+        modelBuilder.Entity<RedeSocial>()
+            .HasOne(rs => rs.Evento)
+            .WithMany(e => e.RedesSociais)
+            .HasForeignKey(rs => rs.EventoId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<RedeSocial>()
+            .HasOne(rs => rs.Palestrante)
+            .WithMany(p => p.RedesSociais)
+            .HasForeignKey(rs => rs.PalestranteId)
+            .OnDelete(DeleteBehavior.Restrict);
+
     }
 }

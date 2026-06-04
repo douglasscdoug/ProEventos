@@ -10,6 +10,7 @@ public class RedeSocial
    public int ? EventoId { get; set; }
    [JsonIgnore]
    public Evento ? Evento { get; set; }
-   public int ? PalestranteId { get; set; }
+   public int? PalestranteId { get; set; }
+   [JsonIgnore]
    public Palestrante ? Palestrante { get; set; }
 }
