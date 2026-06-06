@@ -17,6 +17,7 @@ using System.Text;
 using Microsoft.OpenApi.Models;
 using ProEventos.API.Helpers;
 using Serilog;
+using ProEventos.API.Middlewares;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -132,6 +133,10 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 var app = builder.Build();
+
+app.UseMiddleware<ExceptionMiddleware>();
+
+app.UseMiddleware<RequestLoggingMiddleware>();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
