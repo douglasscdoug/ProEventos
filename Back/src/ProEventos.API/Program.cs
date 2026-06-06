@@ -16,10 +16,21 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.OpenApi.Models;
 using ProEventos.API.Helpers;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// ---- Logging Middleware ----
+Log.Logger = new LoggerConfiguration()
+    .Enrich.FromLogContext()
+    .WriteTo.Console()
+    .WriteTo.File(
+        "Logs/log-.txt",
+        rollingInterval: RollingInterval.Day,
+        retainedFileCountLimit: 7
+    ).CreateLogger();
+
+builder.Host.UseSerilog();
 
 builder.Services.AddDbContext<ProEventosContext>(
     options => options.UseSqlServer(builder.Configuration.GetConnectionString("Default"))
