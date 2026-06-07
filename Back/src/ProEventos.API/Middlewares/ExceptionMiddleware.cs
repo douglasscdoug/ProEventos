@@ -30,7 +30,6 @@ public class ExceptionMiddleware
         catch (BusinessException ex)
         {
             _logger.LogWarning(
-                ex,
                 "Erro de regra de negócio: {Message}",
                 ex.Message
             );
@@ -40,7 +39,6 @@ public class ExceptionMiddleware
         catch (UnauthorizedException ex)
         {
             _logger.LogWarning(
-                ex,
                 "Erro de autenticação/autorização: {Message}",
                 ex.Message
             );
@@ -87,7 +85,8 @@ public class ExceptionMiddleware
         // (opcional) detalhes em dev
         if (_env.IsDevelopment() && exception != null)
         {
-            problem.Extensions["trace"] = exception.Message;
+            problem.Extensions["exception"] = exception.GetType().Name;
+            problem.Extensions["trace"] = exception.StackTrace;
         }
 
         var json = JsonSerializer.Serialize(problem);

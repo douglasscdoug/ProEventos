@@ -16,41 +16,24 @@ namespace ProEventos.API.Middlewares
         public async Task InvokeAsync(HttpContext context)
         {
             var stopwatch = Stopwatch.StartNew();
-            var traceId = Guid.NewGuid();
 
-            using (_logger.BeginScope(new Dictionary<string, object>
-            {
-                ["TraceId"] = traceId,
-                ["Path"] = context.Request.Path,
-                ["Method"] = context.Request.Method
-            }))
-            {
-                try
-                {
-                    _logger.LogInformation("Request iniciada");
+            _logger.LogInformation(
+                "Request iniciada {Method} {Path}",
+                context.Request.Method,
+                context.Request.Path
+            );
 
-                    await _next(context);
+            await _next(context);
 
-                    stopwatch.Stop();
+            stopwatch.Stop();
 
-                    _logger.LogInformation(
-                        "Request finalizada. StatusCode: {StatusCode} Tempo: {ElapsedMilliseconds}ms",
-                        context.Response.StatusCode,
-                        stopwatch.ElapsedMilliseconds
-                    );
-                }
-                catch (Exception ex)
-                {
-                    stopwatch.Stop();
-                    _logger.LogError(
-                        ex,
-                        "Erro durante request. Tempo: {ElapsedMilliseconds}ms",
-                        stopwatch.ElapsedMilliseconds
-                    );
-
-                    throw;
-                }
-            }
+            _logger.LogInformation(
+                "Request finalizada {Method} {Path} StatusCode: {StatusCode} Tempo: {ElapsedMilliseconds}ms",
+                context.Request.Method,
+                context.Request.Path,
+                context.Response.StatusCode,
+                stopwatch.ElapsedMilliseconds
+            );
         }
     }
 }
