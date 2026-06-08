@@ -27,10 +27,8 @@ public class TokenService : ITokenService
             new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["TokenKey"] ?? throw new InvalidOperationException("TokenKey is missing in configuration.")))
         );
 
-   public async Task<string> CreateToken(UserUpdateDto userUpdateDto)
+   public async Task<string> CreateToken(User user)
    {
-      var user = Mapper.Map<User>(userUpdateDto);
-
       if (user.Id == 0)
         throw new InvalidOperationException("User ID is invalid.");
 

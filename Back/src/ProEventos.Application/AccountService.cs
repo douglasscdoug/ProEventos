@@ -1,11 +1,11 @@
-using System;
 using AutoMapper;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using ProEventos.Application.Contratos;
 using ProEventos.Application.Dtos;
+using ProEventos.Application.Exceptions;
 using ProEventos.Domain.Identity;
-using ProEventos.Persistence;
 using ProEventos.Persistence.Contratos;
 
 namespace ProEventos.Application;
@@ -14,111 +14,148 @@ public class AccountService(
    UserManager<User> _userManager,
    SignInManager<User> _signInManager,
    IMapper _mapper,
-   IUserPersist _userPersist
+   IUserPersist _userPersist,
+   ILogger<AccountService> _logger,
+   ITokenService _tokenService
 ) : IAccountService
 {
    public UserManager<User> UserManager { get; } = _userManager;
    public SignInManager<User> SignInManager { get; } = _signInManager;
    public IMapper Mapper { get; } = _mapper;
    public IUserPersist UserPersist { get; } = _userPersist;
+   public ILogger Logger { get; } = _logger;
+   public ITokenService TokenService { get; set; } = _tokenService;
 
-   public async Task<SignInResult?> CheckUserPasswordAsync(UserUpdateDto userUpdateDto, string password)
+   public async Task<LoginResponseDto> LoginAsync(UserLoginDto userLogin)
    {
-      try
+      var user = await UserManager.Users.SingleOrDefaultAsync(u => u.UserName == userLogin.UserName);
+
+      if (user is null) throw new UnauthorizedException("Usuário ou senha inválidos");
+
+      var result = await SignInManager.CheckPasswordSignInAsync(user, userLogin.Password, false);
+
+      if (!result.Succeeded) throw new UnauthorizedException("Usuário ou senha inválidos");
+
+      var token = await TokenService.CreateToken(user);
+
+      Logger.LogInformation(
+         "Login realizado com sucesso para o usuário {UserName}",
+         userLogin.UserName
+      );
+
+      return new LoginResponseDto
       {
-         var user = await UserManager.Users.SingleOrDefaultAsync(u => u.UserName == userUpdateDto.UserName);
-         if(user != null) return await SignInManager.CheckPasswordSignInAsync(user, password, false);
-         
-         return null;
-      }
-      catch (Exception ex)
-      {
-         throw new Exception($"Erro ao tentar verificar o password. Erro: {ex.Message}");
-      }
+         UserName = user.UserName!,
+         Nome = user.Nome,
+         Token = token
+      };
    }
 
-   public async Task<UserUpdateDto?> CreateAccountAsync(UserDto userDto)
+   public async Task<LoginResponseDto> RegisterAsync(UserDto userDto)
    {
-      try
-      {
-         var user = Mapper.Map<User>(userDto);
-         var result = await UserManager.CreateAsync(user, userDto.Password);
+      var existingUser = await UserManager.FindByNameAsync(userDto.UserName);
+      if (existingUser != null) throw new BusinessException("userName", "Já existe um usuário com esse nome.");
 
-         if(result.Succeeded)
+      var user = Mapper.Map<User>(userDto);
+      var result = await UserManager.CreateAsync(user, userDto.Password);
+
+      if (!result.Succeeded)
+      {
+         foreach (var error in result.Errors)
          {
-            var userToReturn = Mapper.Map<UserUpdateDto>(user);
-            return userToReturn;
+            throw new BusinessException("Identity", error.Description);
          }
+      }
 
-         return null;
-      }
-      catch (Exception ex)
+      var token = await TokenService.CreateToken(user);
+
+      Logger.LogInformation(
+            "Novo usuário criado com o userName: {UserName}",
+            user.UserName
+         );
+
+      return new LoginResponseDto
       {
-         throw new Exception($"Erro ao tentar criar conta. Erro: {ex.Message}");
-      }
+         UserName = user.UserName!,
+         Nome = user.Nome,
+         Token = token
+      };
    }
 
-   public async Task<UserUpdateDto?> GetUserByUserNameAsync(string userName)
+   public async Task<LoginResponseDto> UpdateUserAsync(UserUpdateDto userUpdateDto, string loggedUserName)
    {
-      try
+      if (loggedUserName != userUpdateDto.UserName)
+         throw new UnauthorizedException("Usuário inválido");
+         
+      var user = await UserPersist.GetUserByUserNameAsync(userUpdateDto.UserName);
+
+      if (user == null)
+         throw new BusinessException("User", "Usuário não encontrado.");
+
+      userUpdateDto.Id = user.Id;
+
+      Mapper.Map(userUpdateDto, user);
+
+      if (!string.IsNullOrWhiteSpace(userUpdateDto.Password))
       {
+         var tokenReset = await UserManager.GeneratePasswordResetTokenAsync(user);
+         var passwordResult = await UserManager.ResetPasswordAsync(
+            user,
+            tokenReset,
+            userUpdateDto.Password);
+
+         if(!passwordResult.Succeeded)
+         {
+            var error = passwordResult.Errors.First().Description;
+            throw new BusinessException("Password", error);
+         }
+      }
+
+      var result = await UserManager.UpdateAsync(user);
+
+      if (!result.Succeeded)
+      {
+         var error = result.Errors.First().Description;
+         throw new BusinessException("User", error);
+      }
+
+      var token = await TokenService.CreateToken(user);
+
+      Logger.LogInformation(
+         "Atualização do usuário com userName: {UserName}",
+         user.UserName
+      );
+
+      return new LoginResponseDto
+      {
+         UserName = user.UserName!,
+         Nome = user.Nome,
+         Token = token
+      };
+   }
+
+   public async Task<UserUpdateDto> GetUserByUserNameAsync(string userName)
+   {
          var user = await UserPersist.GetUserByUserNameAsync(userName);
-         if(user == null) return null;
+         if (user == null) throw new BusinessException("User", "Erro ao buscar usuário.");
 
          var userUpdateDto = Mapper.Map<UserUpdateDto>(user);
          return userUpdateDto;
-      }
-      catch (Exception ex)
-      {
-         throw new Exception($"Erro ao tentar criar usuario. Erro: {ex.Message}");
-      }
    }
 
-   public async Task<UserUpdateDto?> UpdateAccount(UserUpdateDto userUpdateDto)
-   {
-      try
-      {
-         var user = await UserPersist.GetUserByUserNameAsync(userUpdateDto.UserName);
-         if(user == null) return null;
+    public async Task<UserUpdateDto> UpdateProfileImageAsync(string userName, string imagemUrl)
+    {
 
-         userUpdateDto.Id = user.Id;
+      var user = await UserPersist.GetUserByUserNameAsync(userName);
 
-         Mapper.Map(userUpdateDto, user);
+      if (user == null) throw new BusinessException("User", "Usuário não encontrado");
 
-         if(userUpdateDto.Password != null)
-         {
-            var token = await UserManager.GeneratePasswordResetTokenAsync(user);
-            await UserManager.ResetPasswordAsync(user, token, userUpdateDto.Password);
-         }
+      user.ImagemURL = imagemUrl;
 
-         UserPersist.Update(user);
+      var result = await UserManager.UpdateAsync(user);
 
-         if(await UserPersist.SaveChangesAsync())
-         {
-            if(string.IsNullOrEmpty(user.UserName))
-               throw new Exception("UserName inválido");
-            var userRetorno = await UserPersist.GetUserByUserNameAsync(user.UserName);
+      if (!result.Succeeded) throw new BusinessException("User", result.Errors.First().Description);
 
-            return Mapper.Map<UserUpdateDto>(userRetorno);
-         }
-
-         return null;
-      }
-      catch (Exception ex)
-      {
-         throw new Exception($"Erro ao tentar atualiza usuario. Erro: {ex.Message}");
-      }
-   }
-
-   public async Task<bool> UserExists(string userName)
-   {
-      try
-      {
-         return await UserManager.Users.AnyAsync(user => user.UserName == userName.ToLower());
-      }
-      catch (Exception ex)
-      {
-         throw new Exception($"Erro ao tentar verificar se o usuario existe. Erro: {ex.Message}");
-      }
-   }
+      return Mapper.Map<UserUpdateDto>(user);
+    }
 }
