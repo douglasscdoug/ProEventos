@@ -4,6 +4,7 @@ import { map, Observable, take } from 'rxjs';
 import { Evento } from '../models/Evento';
 import { environment } from 'src/environments/environment';
 import { PaginatedResult } from '@app/models/Pagination';
+import { PagedResult } from '@app/models/paged-result';
 
 @Injectable({
   providedIn: 'root'
@@ -16,13 +17,27 @@ export class EventoService {
 
   constructor(private http: HttpClient) { }
 
+  public filtrar(filtro: any): Observable<PagedResult<Evento>> {
+    let params = new HttpParams;
+
+    Object.keys(filtro).forEach(key => {
+      const value = filtro[key];
+
+      if (value !== null && value !== '') {
+        params = params.set(key, value);
+      }
+    });
+
+    return this.http.get<PagedResult<Evento>>(this.baseURL, { params });
+  }
+
   public getEventos(page?: number, itemsPerPage?: number, term?: string): Observable<PaginatedResult<Evento[]>> {
     const paginatedResult: PaginatedResult<Evento[]> = new PaginatedResult<Evento[]>();
 
     let params = new HttpParams;
 
     if(page != null && itemsPerPage != null) {
-      params = params.append('pageNumber', page.toString());
+      params = params.append('page', page.toString());
       params = params.append('pageSize', itemsPerPage.toString());
     }
 

@@ -1,7 +1,12 @@
 using System;
 using AutoMapper;
+using AutoMapper.QueryableExtensions;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using ProEventos.Application.Common.Utils;
 using ProEventos.Application.Contratos;
 using ProEventos.Application.Dtos;
+using ProEventos.Application.Filters;
 using ProEventos.Domain;
 using ProEventos.Persistence;
 using ProEventos.Persistence.Contratos;
@@ -9,11 +14,16 @@ using ProEventos.Persistence.Models;
 
 namespace ProEventos.Application;
 
-public class EventoService(IGeralPersist geralPersist, IEventoPersist eventoPersist, IMapper mapper) : IEventoService
+public class EventoService(
+   IGeralPersist geralPersist,
+   IEventoPersist eventoPersist,
+   IMapper mapper,
+   ILogger<EventoService> logger) : IEventoService
 {
    public IGeralPersist GeralPersist { get; } = geralPersist;
    public IEventoPersist EventoPersist { get; } = eventoPersist;
    public IMapper Mapper { get; } = mapper;
+   public ILogger<EventoService> Logger { get; set; } = logger;
 
    public async Task<EventoDto?> AddEvento(int userId, EventoDto model)
    {
@@ -158,4 +168,64 @@ public class EventoService(IGeralPersist geralPersist, IEventoPersist eventoPers
          throw new Exception(ex.Message);
       }
    }
+
+    public async Task<PagedResult<EventoDto>> Filtrar(int userId, EventoFiltroDto filtro)
+    {
+      Logger.LogInformation(
+         "Iniciando filtro de eventos. Page={Page}, PageSize={PageSize}, Serch={Search}",
+         filtro.Page,
+         filtro.PageSize,
+         filtro.Search
+      );
+
+      var query = EventoPersist.Query(userId);
+
+      //Busca global
+      if (!string.IsNullOrWhiteSpace(filtro.Search))
+      {
+         var termo = filtro.Search.ToLower();
+
+         query = query.Where(e =>
+            e.Tema.ToLower().Contains(termo) ||
+            e.Local.Contains(termo));
+      }
+      
+      //Busca por Tema
+      if(!string.IsNullOrWhiteSpace(filtro.Tema))
+      {
+         var termo = filtro.Tema.ToLower();
+
+         query = query.Where(e => e.Tema.ToLower().Contains(termo));
+      }
+
+      if (!string.IsNullOrWhiteSpace(filtro.Local))
+      {
+         var termo = filtro.Local.ToLower();
+
+         query = query.Where(e => e.Local.ToLower().Contains(termo));
+      }
+
+      var total = await query.CountAsync();
+
+      //Paginação
+      var data = await query
+         .Skip((filtro.Page - 1) * filtro.PageSize)
+         .Take(filtro.PageSize)
+         .ProjectTo<EventoDto>(Mapper.ConfigurationProvider)
+         .ToListAsync();
+
+      Logger.LogInformation(
+         "Filtro de eventos finalizado. Total={Total}, Retornado={Retornados}",
+         total,
+         data.Count
+      );
+
+      return new PagedResult<EventoDto>
+      {
+         Data = data,
+         Total = total,
+         Page = filtro.Page,
+         PageSize = filtro.PageSize
+      };
+    }
 }

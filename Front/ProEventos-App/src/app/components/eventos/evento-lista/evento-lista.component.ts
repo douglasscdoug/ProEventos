@@ -1,4 +1,4 @@
-import { Component, OnInit, TemplateRef } from '@angular/core';
+import { ChangeDetectorRef, Component, DestroyRef, OnInit, TemplateRef } from '@angular/core';
 import { EventoService } from '@app/services/evento.service';
 import { BsModalRef, BsModalService, ModalModule } from 'ngx-bootstrap/modal';
 import { ToastrModule, ToastrService } from 'ngx-toastr';
@@ -6,14 +6,15 @@ import { NgxSpinnerService } from 'ngx-spinner';
 import { Evento } from '@app/models/Evento';
 import { CommonModule } from '@angular/common';
 import { CollapseModule } from 'ngx-bootstrap/collapse';
-import { FormsModule } from '@angular/forms';
+import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { TooltipModule } from 'ngx-bootstrap/tooltip';
 import { DateTimeFormatPipe } from '@app/helpers/DateTimeFormat.pipe';
 import { Router, RouterLink } from '@angular/router';
-import { debounceTime, Observable, Subject } from 'rxjs';
+import { debounceTime, distinctUntilChanged, finalize, Observable, Subject } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { PageChangedEvent, PaginationModule } from 'ngx-bootstrap/pagination';
 import { PaginatedResult, Pagination } from '@app/models/Pagination';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-evento-lista',
@@ -26,7 +27,8 @@ import { PaginatedResult, Pagination } from '@app/models/Pagination';
     DateTimeFormatPipe,
     ToastrModule,
     RouterLink,
-    PaginationModule
+    PaginationModule,
+    ReactiveFormsModule
   ],
   styleUrls: ['./evento-lista.component.scss']
 })
@@ -38,35 +40,83 @@ export class EventoListaComponent implements OnInit {
   public mostrarImagem = true;
   public pagination = {} as Pagination;
   public termoBuscaChanged: Subject<string> = new Subject<string>();
+  public searchControl = new FormControl('', { nonNullable: true });
+  //Paginação
+  public total = 0;
+  public page = 1;
+  public pageSize = 5;
+  public orderBy = '';
+  public desc = false;
+  public loading = false;
 
   constructor(
     private eventoService: EventoService,
     private modalService: BsModalService,
     private toastr: ToastrService,
     private spinner: NgxSpinnerService,
-    private router: Router
+    private router: Router,
+    private cdr: ChangeDetectorRef,
+    private destroyRef: DestroyRef
   ) { }
 
   ngOnInit() {
-    this.pagination = { currentPage: 1, itemsPerPage: 3 } as Pagination;
+    this.buscar('');
 
-    this.termoBuscaChanged
-        .pipe(debounceTime(1000))
-        .subscribe((filtrarPor) => {
-          this.spinner.show();
-          this.eventoService.getEventos(this.pagination.currentPage, this.pagination.itemsPerPage, filtrarPor).subscribe({
-            next: (response: PaginatedResult<Evento[]>) => {
-              this.eventos = response.result ?? [];
-              this.pagination = response.pagination ?? new Pagination;
-            },
-            error: (error) => {
-              this.spinner.hide();
-              this.toastr.error('Erro ao carregar os eventos', 'Erro')
-            }
-          }).add(() => this.spinner.hide());
-        });
+    this.searchControl.valueChanges.pipe(
+      debounceTime(500),
+      distinctUntilChanged(),
+      takeUntilDestroyed(this.destroyRef))
+      .subscribe(search => {
+        if (this.page !== 1) this.page = 1;
+        this.buscar(search);
+      })
+    
+    
+    
+    // this.pagination = { currentPage: 1, itemsPerPage: 3 } as Pagination;
 
-    this.carregarEventos();
+    // this.termoBuscaChanged
+    //     .pipe(debounceTime(1000))
+    //     .subscribe((filtrarPor) => {
+    //       this.spinner.show();
+    //       this.eventoService.getEventos(this.pagination.currentPage, this.pagination.itemsPerPage, filtrarPor).subscribe({
+    //         next: (response: PaginatedResult<Evento[]>) => {
+    //           this.eventos = response.result ?? [];
+    //           this.pagination = response.pagination ?? new Pagination;
+    //         },
+    //         error: (error) => {
+    //           this.spinner.hide();
+    //           this.toastr.error('Erro ao carregar os eventos', 'Erro')
+    //         }
+    //       }).add(() => this.spinner.hide());
+    //     });
+
+    // this.carregarEventos();
+  }
+
+  public buscar(search: string): void {
+    this.loading = true;
+
+    const filtro = {
+      search,
+      page: this.page,
+      pageSize: this.pageSize,
+      orderBy: this.orderBy,
+      desc: this.desc
+    }
+
+    this.eventoService.filtrar(filtro)
+      .pipe(finalize(() => {
+        this.loading = false;
+        this.cdr.detectChanges();
+      }))
+      .subscribe({
+        next: (res) => {
+          this.eventos = res.data;
+          this.total = res.total;
+          this.cdr.detectChanges();
+        }
+      })
   }
 
   public filtrarEventos(evt: any): void {
@@ -126,8 +176,14 @@ export class EventoListaComponent implements OnInit {
   }
 
   public pageChanged(event: PageChangedEvent): void {
-    this.pagination.currentPage = event.page;
-    this.carregarEventos();
+    this.page = event.page;
+    this.buscar(this.searchControl.value);
+  }
+
+  public onPageSizeChange(event: any) {
+    this.pageSize = +event.target.value;
+    this.page = 1;
+    this.buscar(this.searchControl.value);
   }
 
   detalheEvento(id: number): void {

@@ -9,7 +9,7 @@
           type="text"
           class="form-control me-2"
           placeholder="Filtrar por tema e local"
-          (input)="filtrarEventos($event.target)"
+          [formControl]="searchControl"
         />
       </div>
     </div>
@@ -21,7 +21,13 @@
     </div>
   </div>
 
-  <table class="table table-striped table-hover">
+  @if (loading) {
+    <div class="text-center my-4">
+      <div class="spinner-border"></div>
+    </div>
+  }
+  @else
+  {<table class="table table-striped table-hover">
     <thead class="table-dark">
       <tr>
         <th class="d-none d-md-table-cell">
@@ -68,7 +74,8 @@
         <td>
           <button
             type="button"
-            (click)="openModal($event, template, evento.id)"
+            (click)="openModal($event, template,
+    evento.id)"
             class="btn btn-danger btn-lg ms-2"
             tooltip="Excluir"
           >
@@ -77,19 +84,35 @@
         </td>
       </tr>
     </tbody>
-    <tfoot *ngIf="!eventos.length">
-      <tr>
-        <td colspan="8" class="text-center">
-          <h4>Nenhum evento encontrado!</h4>
-        </td>
-      </tr>
-    </tfoot>
   </table>
-  <div class="d-flex justify-content-center">
+
+    @if(eventos.length === 0) {
+      <div class="text-center my-3">Nenhum registro encontrado</div>
+    }
+  }
+
+  <div class="d-flex justify-content-between align-items-center mt-3">
+    <div>
+      <span> Exibindo {{ eventos.length }} de {{ total }} registros </span>
+    </div>
+    <div class="d-flex align-items-center gap-3">
+      <div>
+        <label class="me-2">Itens por página:</label>
+        <select
+          class="form-select d-inline w-auto"
+          [value]="pageSize"
+          (change)="onPageSizeChange($event)"
+        >
+          <option [value]="5">5</option>
+          <option [value]="10">10</option>
+          <option [value]="20">20</option>
+        </select>
+      </div>
+    </div>
     <pagination
       [boundaryLinks]="true"
-      [totalItems]="pagination.totalItems"
-      [itemsPerPage]="pagination.itemsPerPage"
+      [totalItems]="total"
+      [itemsPerPage]="pageSize"
       (pageChanged)="pageChanged($event)"
       pageBtnClass="btn"
       previousText="&lsaquo;"

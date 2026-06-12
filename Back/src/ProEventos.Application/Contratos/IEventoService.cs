@@ -1,4 +1,6 @@
+using ProEventos.Application.Common.Utils;
 using ProEventos.Application.Dtos;
+using ProEventos.Application.Filters;
 using ProEventos.Persistence.Models;
 
 namespace ProEventos.Application.Contratos;
@@ -11,4 +13,5 @@ public interface IEventoService
    Task<bool> AdicionarPalestrantesAoEvento(int userId, int eventoId, List<PalestranteEventoDto> palestrantes);
    Task<PageList<EventoDto>?> GetAllEventosAsync(int userId, PageParams pageParams, bool includePalestrantes = false);
    Task<EventoDto?> GetEventoByIdAsync(int userId, int eventoId, bool includePalestrantes);
+   Task<PagedResult<EventoDto>> Filtrar(int userId, EventoFiltroDto filtro);
 }

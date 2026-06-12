@@ -4,6 +4,7 @@ using ProEventos.API.Extensions;
 using ProEventos.API.Helpers;
 using ProEventos.Application.Contratos;
 using ProEventos.Application.Dtos;
+using ProEventos.Application.Filters;
 using ProEventos.Persistence.Models;
 
 namespace ProEventos.API.Controllers;
@@ -23,22 +24,24 @@ public class EventosController(
     private readonly string _destino = "Images";
 
     [HttpGet]
-    public async Task<IActionResult> Get([FromQuery]PageParams pageParams)
+    public async Task<IActionResult> Get([FromQuery] EventoFiltroDto filtro)
     {
-        try
-        {
-            var eventos = await EventoService.GetAllEventosAsync(User.GetUserId(), pageParams, false);
-            if (eventos == null) return NoContent();
+        var result = await EventoService.Filtrar(User.GetUserId(), filtro);
+        return Ok(result);
+        // try
+        // {
+        //     var eventos = await EventoService.GetAllEventosAsync(User.GetUserId(), pageParams, false);
+        //     if (eventos == null) return NoContent();
 
-            Response.AddPagination(eventos.CurrentPage, eventos.PageSize, eventos.TotalCount, eventos.TotalPages);
+        //     Response.AddPagination(eventos.CurrentPage, eventos.PageSize, eventos.TotalCount, eventos.TotalPages);
 
-            return Ok(eventos);
-        }
-        catch (Exception ex)
-        {
-            return this.StatusCode(StatusCodes.Status500InternalServerError,
-                $"Erro ao tentar recuperar eventos. Erro: {ex.Message}");
-        }
+        //     return Ok(eventos);
+        // }
+        // catch (Exception ex)
+        // {
+        //     return this.StatusCode(StatusCodes.Status500InternalServerError,
+        //         $"Erro ao tentar recuperar eventos. Erro: {ex.Message}");
+        // }
     }
 
     [HttpGet("{id}")]

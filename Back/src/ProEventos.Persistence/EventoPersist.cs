@@ -60,4 +60,15 @@ public class EventoPersist(ProEventosContext _context) : IEventoPersist
 
       return await query.ToArrayAsync();
    }
+
+    public IQueryable<Evento> Query(int userId)
+    {
+      IQueryable<Evento> query = Context.Eventos
+         .Include(e => e.Lotes)
+         .Include(e => e.RedesSociais);
+
+      query = query.Where(e => e.UserId == userId);
+
+      return query.AsQueryable();
+    }
 }
