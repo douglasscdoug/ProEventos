@@ -4,6 +4,7 @@ using ProEventos.API.Extensions;
 using ProEventos.API.Helpers;
 using ProEventos.Application.Contratos;
 using ProEventos.Application.Dtos;
+using ProEventos.Application.Exceptions;
 using ProEventos.Application.Filters;
 using ProEventos.Persistence.Models;
 
@@ -28,141 +29,78 @@ public class EventosController(
     {
         var result = await EventoService.Filtrar(User.GetUserId(), filtro);
         return Ok(result);
-        // try
-        // {
-        //     var eventos = await EventoService.GetAllEventosAsync(User.GetUserId(), pageParams, false);
-        //     if (eventos == null) return NoContent();
-
-        //     Response.AddPagination(eventos.CurrentPage, eventos.PageSize, eventos.TotalCount, eventos.TotalPages);
-
-        //     return Ok(eventos);
-        // }
-        // catch (Exception ex)
-        // {
-        //     return this.StatusCode(StatusCodes.Status500InternalServerError,
-        //         $"Erro ao tentar recuperar eventos. Erro: {ex.Message}");
-        // }
     }
 
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(int id)
     {
-        try
-        {
-            var evento = await EventoService.GetEventoByIdAsync(User.GetUserId(), id, true);
-            if (evento == null) return NoContent();
+        var evento = await EventoService.GetEventoByIdAsync(User.GetUserId(), id, true);
+        if (evento == null) return NotFound();
 
-            return Ok(evento);
-        }
-        catch (Exception ex)
-        {
-            return this.StatusCode(StatusCodes.Status500InternalServerError,
-                $"Erro ao tentar recuperar eventos. Erro: {ex.Message}");
-        }
+        return Ok(evento);
     }
 
     [HttpPost]
     public async Task<IActionResult> Post(EventoDto model)
     {
-        try
-        {
-            var evento = await EventoService.AddEvento(User.GetUserId(), model);
-            if (evento == null) return NoContent();
+        var evento = await EventoService.AddEvento(User.GetUserId(), model);
 
-            return Ok(evento);
-        }
-        catch (Exception ex)
-        {
-            return this.StatusCode(StatusCodes.Status500InternalServerError,
-                $"Erro ao tentar recuperar eventos. Erro: {ex.Message}");
-        }
-    }
-
-    [HttpPost("upload-image/{eventoId}")]
-    public async Task<IActionResult> UploadImage(int eventoId)
-    {
-        try
-        {
-            var evento = await EventoService.GetEventoByIdAsync(User.GetUserId(), eventoId, false);
-            if (evento == null) return NoContent();
-
-            var file = Request.Form.Files[0];
-
-            if (file.Length > 0)
-            {
-                if (evento.ImagemUrl != null) Util.DeleteImage(evento.ImagemUrl, _destino);
-
-                evento.ImagemUrl = await Util.SaveImage(file, _destino);
-            }
-
-            var eventoRetorno = await EventoService.UpdateEvento(User.GetUserId(), eventoId, evento);
-
-            return Ok(eventoRetorno);
-        }
-        catch (Exception ex)
-        {
-            return this.StatusCode(StatusCodes.Status500InternalServerError,
-                $"Erro ao tentar fazer upload de imagem do evento. Erro: {ex.Message}");
-        }
+        return Ok(evento);
     }
 
     [HttpPut("{id}")]
     public async Task<IActionResult> Put(int id, EventoDto model)
     {
+        var evento = await EventoService.UpdateEvento(User.GetUserId(), id, model);
+        if (evento == null) return NotFound();
+
+        return Ok(evento);
+    }
+
+    [HttpPost("upload-image/{eventoId}")]
+    public async Task<IActionResult> UploadImage(int eventoId, IFormFile file)
+    {
+        if (file == null) throw new BusinessException("File", "Nenhum arquivo foi enviado.");
+
+        var evento = await EventoService.GetEventoByIdAsync(User.GetUserId(), eventoId, false);
+
+        if (evento == null) throw new BusinessException("Evento", "Evento não encontrado");
+
+        var oldImage = evento.ImagemUrl;
+        var newImage = await Util.SaveImage(file, _destino);
+
         try
         {
-            var evento = await EventoService.UpdateEvento(User.GetUserId(), id, model);
-            if (evento == null) return NoContent();
+            var result = await EventoService.UploadImageAsync(User.GetUserId(), eventoId, newImage);
 
-            return Ok(evento);
+            if (!string.IsNullOrWhiteSpace(oldImage)) Util.DeleteImage(oldImage, _destino);
+
+            return Ok(result);
         }
-        catch (Exception ex)
+        catch
         {
-            return this.StatusCode(StatusCodes.Status500InternalServerError,
-                $"Erro ao tentar atualizar os eventos. Erro: {ex.Message}");
+            if (!string.IsNullOrWhiteSpace(newImage)) Util.DeleteImage(newImage, _destino);
+            throw;
         }
     }
 
     [HttpPut("palestrantes/{eventoId}")]
     public async Task<IActionResult> PutPalestrantes(int eventoId, List<PalestranteEventoDto> palestrantes)
     {
-        try
-        {
-            var resultado = await EventoService.AdicionarPalestrantesAoEvento(User.GetUserId(), eventoId, palestrantes);
+        var resultado = await EventoService.AdicionarPalestrantesAoEvento(User.GetUserId(), eventoId, palestrantes);
 
-            if (!resultado) throw new Exception("Erro ao tentar adicionar palestrantes");
+        if (!resultado) throw new BusinessException("Erro", "Erro ao tentar adicionar palestrantes");
 
-            return Ok(new { message = "Adicionado"});
-        }
-        catch (Exception ex)
-        {
-            return this.StatusCode(StatusCodes.Status500InternalServerError,
-                $"Erro ao tentar adicionar palestrantes ao evento. Erro: {ex.Message}");
-        }
+        return Ok(new { message = "Adicionado" });
     }
 
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(int id)
     {
-        try
-        {
-            var evento = await EventoService.GetEventoByIdAsync(User.GetUserId(), id, false);
-            if (evento == null) return NoContent();
+        var deleted = await EventoService.DeleteEvento(User.GetUserId(), id);
 
-            if (await EventoService.DeleteEvento(User.GetUserId(), id))
-            {
-                Util.DeleteImage(evento.ImagemUrl ?? throw new Exception("Url da Imagem inválida"), _destino);
-                return Ok(new { message = "Deletado" });
-            }
-            else
-            {
-                throw new Exception("Ocorreu um erro ao tentar deletar o Evento.");
-            }
-        }
-        catch (Exception ex)
-        {
-            return this.StatusCode(StatusCodes.Status500InternalServerError,
-                $"Erro ao tentar deletar os eventos. Erro: {ex.Message}");
-        }
+        if(!deleted) return NotFound();
+
+        return NoContent();
     }
 }

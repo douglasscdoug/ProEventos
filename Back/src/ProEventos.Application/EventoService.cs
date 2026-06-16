@@ -6,6 +6,7 @@ using Microsoft.Extensions.Logging;
 using ProEventos.Application.Common.Utils;
 using ProEventos.Application.Contratos;
 using ProEventos.Application.Dtos;
+using ProEventos.Application.Exceptions;
 using ProEventos.Application.Filters;
 using ProEventos.Domain;
 using ProEventos.Persistence;
@@ -25,152 +26,8 @@ public class EventoService(
    public IMapper Mapper { get; } = mapper;
    public ILogger<EventoService> Logger { get; set; } = logger;
 
-   public async Task<EventoDto?> AddEvento(int userId, EventoDto model)
+   public async Task<PagedResult<EventoDto>> Filtrar(int userId, EventoFiltroDto filtro)
    {
-      try
-      {
-         var evento = Mapper.Map<Evento>(model);
-         evento.UserId = userId;
-
-         GeralPersist.Add<Evento>(evento);
-
-         if (await GeralPersist.SaveChangesAsync())
-         {
-            var eventoRetorno = await EventoPersist.GetEventoByIdAsync(evento.UserId, evento.Id, true);
-            return Mapper.Map<EventoDto>(eventoRetorno);
-         }
-
-         return null;
-      }
-      catch (Exception ex)
-      {
-         throw new Exception(ex.Message);
-      }
-   }
-
-   public async Task<EventoDto?> UpdateEvento(int userId, int eventoId, EventoDto model)
-   {
-        try
-        {
-            var evento = await EventoPersist.GetEventoByIdAsync(userId, eventoId, false);
-            if(evento == null) return null;
-
-            model.Id = evento.Id;
-            model.UserId = userId;
-
-            Mapper.Map(model, evento);
-
-            GeralPersist.Update<Evento>(evento);
-
-            if(await GeralPersist.SaveChangesAsync()){
-               var eventoRetorno = await EventoPersist.GetEventoByIdAsync(userId, evento.Id, true);
-               return Mapper.Map<EventoDto>(eventoRetorno);
-            }
-            return null;
-        }
-        catch (Exception ex)
-        {
-            throw new Exception(ex.Message);
-        }
-   }
-
-   public async Task<bool> DeleteEvento(int userId, int eventoId)
-   {
-      try
-      {
-         var evento = await EventoPersist.GetEventoByIdAsync(userId, eventoId, false);
-         if (evento == null)
-         {
-            new Exception("Evento não encontrado!");
-         }
-         else
-         {
-            GeralPersist.Delete<Evento>(evento);
-         }
-
-         return await GeralPersist.SaveChangesAsync();
-      }
-      catch (Exception ex)
-      {
-         throw new Exception(ex.Message);
-      }
-   }
-
-   public async Task<bool> AdicionarPalestrantesAoEvento(int userId, int eventoId, List<PalestranteEventoDto> palestrantes)
-   {
-      try
-      {
-         var evento = await EventoPersist.GetEventoByIdAsync(userId, eventoId, true);
-
-         if (evento == null) throw new Exception("Evento não encontrado");
-
-         var palestrantesExistentes = await EventoPersist.GetPalestrantesByEventoIdAsync(eventoId);
-         if (palestrantesExistentes.Any()) GeralPersist.DeleteRange(palestrantesExistentes.ToArray());
-
-         foreach (var palestrante in palestrantes)
-         {
-            GeralPersist.Add(new PalestranteEvento
-            {
-               EventoId = eventoId,
-               PalestranteId = palestrante.PalestranteId
-            });
-         }
-
-         return await GeralPersist.SaveChangesAsync();
-      }
-      catch (Exception ex)
-      {
-         throw new Exception(ex.Message);
-      }
-   }
-
-   public async Task<PageList<EventoDto>?> GetAllEventosAsync(int userId, PageParams pageParams, bool includePalestrantes = false)
-   {
-      try
-      {
-         var eventos = await EventoPersist.GetAllEventosAsync(userId, pageParams, includePalestrantes);
-         if (eventos == null)
-         {
-            return null;
-         }
-
-         var resultado = Mapper.Map<PageList<EventoDto>>(eventos);
-
-         resultado.CurrentPage = eventos.CurrentPage;
-         resultado.TotalPages = eventos.TotalPages;
-         resultado.PageSize = eventos.PageSize;
-         resultado.TotalCount = eventos.TotalCount;
-
-         return resultado;
-      }
-      catch (Exception ex)
-      {
-         throw new Exception(ex.Message);
-      }
-   }
-
-   public async Task<EventoDto?> GetEventoByIdAsync(int userId, int eventoId, bool includePalestrantes = true)
-   {
-      try
-      {
-         var evento = await EventoPersist.GetEventoByIdAsync(userId, eventoId, includePalestrantes);
-         if (evento == null)
-         {
-            return null;
-         }
-
-         var resultado = Mapper.Map<EventoDto>(evento);
-
-         return resultado;
-      }
-      catch (Exception ex)
-      {
-         throw new Exception(ex.Message);
-      }
-   }
-
-    public async Task<PagedResult<EventoDto>> Filtrar(int userId, EventoFiltroDto filtro)
-    {
       Logger.LogInformation(
          "Iniciando filtro de eventos. Page={Page}, PageSize={PageSize}, Serch={Search}",
          filtro.Page,
@@ -189,9 +46,9 @@ public class EventoService(
             e.Tema.ToLower().Contains(termo) ||
             e.Local.Contains(termo));
       }
-      
+
       //Busca por Tema
-      if(!string.IsNullOrWhiteSpace(filtro.Tema))
+      if (!string.IsNullOrWhiteSpace(filtro.Tema))
       {
          var termo = filtro.Tema.ToLower();
 
@@ -229,11 +86,154 @@ public class EventoService(
          Page = filtro.Page,
          PageSize = filtro.PageSize
       };
-    }
+   }
 
-    private IQueryable<Evento> ApplyOrdering(IQueryable<Evento> query, PagedRequest filtro)
+   public async Task<EventoDto?> GetEventoByIdAsync(int userId, int eventoId, bool includePalestrantes = true)
    {
-      if(string.IsNullOrWhiteSpace(filtro.OrderBy))
+      Logger.LogInformation("Buscando evento Id: {EventoId}, para usuário Id: {UserId}", eventoId, userId);
+
+      var evento = await EventoPersist.GetEventoByIdAsync(userId, eventoId, includePalestrantes);
+      if (evento == null)
+      {
+         Logger.LogInformation("Evento Id: {EventoId} não encontrado", eventoId);
+         return null;
+      }
+
+      var resultado = Mapper.Map<EventoDto>(evento);
+
+      Logger.LogInformation("Evento Id: {EventoId} encontrado com sucesso", eventoId);
+
+      return resultado;
+   }
+
+   public async Task<EventoDto> AddEvento(int userId, EventoDto model)
+   {
+      Logger.LogInformation("Iniciando cadastro de novo evento");
+
+      var evento = Mapper.Map<Evento>(model);
+      evento.UserId = userId;
+
+      GeralPersist.Add<Evento>(evento);
+
+      var sucess = await GeralPersist.SaveChangesAsync();
+
+      if (!sucess)
+      {
+         Logger.LogInformation("Erro ao cadastrar evento");
+
+         throw new BusinessException("Erro", "Erro ao salvar evento");
+      }
+
+      var eventoRetorno = await EventoPersist.GetEventoByIdAsync(evento.UserId, evento.Id, true);
+      return Mapper.Map<EventoDto>(eventoRetorno);
+   }
+
+   public async Task<EventoDto?> UpdateEvento(int userId, int eventoId, EventoDto model)
+   {
+      Logger.LogInformation("Iniciando atualização do evento id: {empresaId}", eventoId);
+
+      var evento = await EventoPersist.GetEventoByIdAsync(userId, eventoId, false);
+      if (evento == null)
+      {
+         Logger.LogInformation("Tentativa de atualização de evento inexistente id: {EventoId}", eventoId);
+
+         return null;
+      }
+
+      model.Id = evento.Id;
+      model.UserId = userId;
+
+      Mapper.Map(model, evento);
+
+      GeralPersist.Update<Evento>(evento);
+
+      var sucess = await GeralPersist.SaveChangesAsync();
+
+      if (!sucess)
+      {
+         Logger.LogInformation("Erro ao salvar evento id: {EventoId}", eventoId);
+
+         throw new BusinessException("Erro", "Erro ao salvar evento");
+      }
+
+      var eventoRetorno = await EventoPersist.GetEventoByIdAsync(userId, evento.Id, true);
+      Logger.LogInformation("Evento id: {EventoId} atualizado com sucesso.", eventoId);
+      return Mapper.Map<EventoDto>(eventoRetorno);
+   }
+
+   public async Task<EventoDto> UploadImageAsync(int userId, int eventoId, string imagemUrl)
+   {
+      var evento = await EventoPersist.GetEventoByIdAsync(userId, eventoId);
+
+      if (evento == null) throw new BusinessException("Evento", "Evento não encontrado");
+
+      evento.ImagemUrl = imagemUrl;
+
+      GeralPersist.Update<Evento>(evento);
+
+      var sucess = await GeralPersist.SaveChangesAsync();
+
+      if (!sucess)
+      {
+         Logger.LogInformation("Erro ao atualizar imagem do evento id: {EventoId}", eventoId);
+         throw new BusinessException("Evento", "Erro ao salvar imagem do evento");
+      }
+
+      Logger.LogInformation("Imagem do evento id: {eventoId} atualizada com sucesso", eventoId);
+
+      return Mapper.Map<EventoDto>(evento);
+   }
+
+   public async Task<bool> AdicionarPalestrantesAoEvento(int userId, int eventoId, List<PalestranteEventoDto> palestrantes)
+   {
+      Logger.LogInformation("Iniciando inserção de palestrantes ao evento id: {EventoId}", eventoId);
+      var evento = await EventoPersist.GetEventoByIdAsync(userId, eventoId, true);
+
+      if (evento == null) throw new BusinessException("Evento", "Evento não encontrado");
+
+      var palestrantesExistentes = await EventoPersist.GetPalestrantesByEventoIdAsync(eventoId);
+      if (palestrantesExistentes.Any()) GeralPersist.DeleteRange(palestrantesExistentes.ToArray());
+
+      foreach (var palestrante in palestrantes)
+      {
+         GeralPersist.Add(new PalestranteEvento
+         {
+            EventoId = eventoId,
+            PalestranteId = palestrante.PalestranteId
+         });
+      }
+
+      var sucess = await GeralPersist.SaveChangesAsync();
+
+      if (sucess) Logger.LogInformation("Palestrantes adicionados no evento id: {EventoId}", eventoId);
+
+      return sucess;
+   }
+
+   public async Task<bool> DeleteEvento(int userId, int eventoId)
+   {
+      Logger.LogInformation("Iniciando exclusão de evento id: {EventoId}", eventoId);
+
+      var evento = await EventoPersist.GetEventoByIdAsync(userId, eventoId, false);
+      if (evento == null)
+      {
+         Logger.LogInformation("Tentativa de excluir evento inexistente id: {EventoId}", eventoId);
+
+         return false;
+      }
+
+      GeralPersist.Delete<Evento>(evento);
+
+      var sucess = await GeralPersist.SaveChangesAsync();
+
+      if (sucess) Logger.LogInformation("Evento id: {EventoId} deletado com sucesso.", eventoId);
+
+      return sucess;
+   }
+
+   private IQueryable<Evento> ApplyOrdering(IQueryable<Evento> query, PagedRequest filtro)
+   {
+      if (string.IsNullOrWhiteSpace(filtro.OrderBy))
          return query.OrderBy(e => e.Id);
 
       return filtro.OrderBy.ToLower() switch

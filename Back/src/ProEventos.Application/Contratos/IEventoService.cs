@@ -7,11 +7,11 @@ namespace ProEventos.Application.Contratos;
 
 public interface IEventoService
 {
-   Task<EventoDto?> AddEvento(int userId, EventoDto model);
-   Task<EventoDto?> UpdateEvento(int userId, int eventoId, EventoDto model);
-   Task<bool> DeleteEvento(int userId, int eventoId);
-   Task<bool> AdicionarPalestrantesAoEvento(int userId, int eventoId, List<PalestranteEventoDto> palestrantes);
-   Task<PageList<EventoDto>?> GetAllEventosAsync(int userId, PageParams pageParams, bool includePalestrantes = false);
-   Task<EventoDto?> GetEventoByIdAsync(int userId, int eventoId, bool includePalestrantes);
    Task<PagedResult<EventoDto>> Filtrar(int userId, EventoFiltroDto filtro);
+   Task<EventoDto?> GetEventoByIdAsync(int userId, int eventoId, bool includePalestrantes);
+   Task<EventoDto> AddEvento(int userId, EventoDto model);
+   Task<EventoDto?> UpdateEvento(int userId, int eventoId, EventoDto model);
+   Task<EventoDto> UploadImageAsync(int userId, int eventoId, string imagemUrl);
+   Task<bool> AdicionarPalestrantesAoEvento(int userId, int eventoId, List<PalestranteEventoDto> palestrantes);
+   Task<bool> DeleteEvento(int userId, int eventoId);
 }
