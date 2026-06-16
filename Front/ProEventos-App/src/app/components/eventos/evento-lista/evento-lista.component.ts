@@ -70,28 +70,6 @@ export class EventoListaComponent implements OnInit {
         if (this.page !== 1) this.page = 1;
         this.buscar(search);
       })
-    
-    
-    
-    // this.pagination = { currentPage: 1, itemsPerPage: 3 } as Pagination;
-
-    // this.termoBuscaChanged
-    //     .pipe(debounceTime(1000))
-    //     .subscribe((filtrarPor) => {
-    //       this.spinner.show();
-    //       this.eventoService.getEventos(this.pagination.currentPage, this.pagination.itemsPerPage, filtrarPor).subscribe({
-    //         next: (response: PaginatedResult<Evento[]>) => {
-    //           this.eventos = response.result ?? [];
-    //           this.pagination = response.pagination ?? new Pagination;
-    //         },
-    //         error: (error) => {
-    //           this.spinner.hide();
-    //           this.toastr.error('Erro ao carregar os eventos', 'Erro')
-    //         }
-    //       }).add(() => this.spinner.hide());
-    //     });
-
-    // this.carregarEventos();
   }
 
   public buscar(search: string): void {
@@ -121,6 +99,19 @@ export class EventoListaComponent implements OnInit {
 
   public filtrarEventos(evt: any): void {
     this.termoBuscaChanged.next(evt.value);
+  }
+
+  public ordenar(coluna: string): void {
+    if(this.orderBy === coluna){
+      this.desc = !this.desc;
+    }
+    else {
+      this.orderBy = coluna;
+      this.desc = false;
+    }
+
+    this.page = 1;
+    this.buscar(this.searchControl.value);
   }
 
   public alterarImagem(): void {

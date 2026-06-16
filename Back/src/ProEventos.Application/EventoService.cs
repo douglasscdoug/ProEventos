@@ -207,6 +207,8 @@ public class EventoService(
 
       var total = await query.CountAsync();
 
+      query = ApplyOrdering(query, filtro);
+
       //Paginação
       var data = await query
          .Skip((filtro.Page - 1) * filtro.PageSize)
@@ -228,4 +230,31 @@ public class EventoService(
          PageSize = filtro.PageSize
       };
     }
+
+    private IQueryable<Evento> ApplyOrdering(IQueryable<Evento> query, PagedRequest filtro)
+   {
+      if(string.IsNullOrWhiteSpace(filtro.OrderBy))
+         return query.OrderBy(e => e.Id);
+
+      return filtro.OrderBy.ToLower() switch
+      {
+         "tema" => filtro.Desc
+            ? query.OrderByDescending(e => e.Tema)
+            : query.OrderBy(e => e.Tema),
+
+         "local" => filtro.Desc
+            ? query.OrderByDescending(e => e.Local)
+            : query.OrderBy(e => e.Local),
+
+         "dataevento" => filtro.Desc
+            ? query.OrderByDescending(e => e.DataEvento)
+            : query.OrderBy(e => e.DataEvento),
+
+         "qtdpessoas" => filtro.Desc
+            ? query.OrderByDescending(e => e.QtdPessoas)
+            : query.OrderBy(e => e.QtdPessoas),
+
+         _ => query.OrderBy(e => e.Id)
+      };
+   }
 }

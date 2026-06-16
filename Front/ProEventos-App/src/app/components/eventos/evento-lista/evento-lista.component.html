@@ -43,10 +43,29 @@
           </button>
         </th>
         <th>#</th>
-        <th>Tema</th>
-        <th class="d-none d-md-table-cell">Local</th>
-        <th>Data</th>
-        <th class="d-none d-md-table-cell">Qtd Pessoas</th>
+        <th (click)="ordenar('tema')" style="cursor: pointer">Tema 
+          @if(orderBy === 'tema'){
+            <i class="bi" [ngClass]="desc ? 'bi-caret-down' : 'bi-caret-up'"></i>
+          }
+        </th>
+        <th class="d-none d-md-table-cell" (click)="ordenar('local')" style="cursor: pointer">
+          Local
+          @if(orderBy === 'local'){
+            <i class="bi" [ngClass]="desc ? 'bi-caret-down' : 'bi-caret-up'"></i>
+          }
+        </th>
+        <th (click)="ordenar('dataEvento')" style="cursor: pointer">
+          Data
+          @if(orderBy === 'dataEvento'){
+            <i class="bi" [ngClass]="desc ? 'bi-caret-down' : 'bi-caret-up'"></i>
+          }
+        </th>
+        <th class="d-none d-md-table-cell" (click)="ordenar('qtdPessoas')" style="cursor: pointer">
+          Qtd Pessoas
+          @if(orderBy === 'qtdPessoas'){
+            <i class="bi" [ngClass]="desc ? 'bi-caret-down' : 'bi-caret-up'"></i>
+          }
+        </th>
         <th class="d-none d-md-table-cell">Lote</th>
         <th>Opções</th>
       </tr>
@@ -70,7 +89,7 @@
         <td class="d-none d-md-table-cell">{{ evento.local }}</td>
         <td>{{ evento.dataEvento | DateFormatPipe }}</td>
         <td class="d-none d-md-table-cell">{{ evento.qtdPessoas }}</td>
-        <td class="d-none d-md-table-cell">{{ evento.lotes[0]?.nome }}</td>
+        <td class="d-none d-md-table-cell">{{ evento.lotes.length > 0 ? evento.lotes[0].nome : '' }}</td>
         <td>
           <button
             type="button"
