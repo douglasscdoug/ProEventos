@@ -5,6 +5,6 @@ namespace ProEventos.Persistence.Contratos;
 
 public interface IPalestrantePersist : IGeralPersist
 {
-   Task<PageList<Palestrante?>> GetAllPalestrantesAsync(PageParams pageParams, bool includeEventos = false);
+   IQueryable<Palestrante> Query();
    Task<Palestrante?> GetPalestranteByUserIdAsync(int userId, bool includeEventos = false);
 }

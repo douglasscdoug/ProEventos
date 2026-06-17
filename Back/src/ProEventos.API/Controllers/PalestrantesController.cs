@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using ProEventos.API.Extensions;
 using ProEventos.Application.Contratos;
 using ProEventos.Application.Dtos;
+using ProEventos.Application.Filters;
 using ProEventos.Persistence.Models;
 
 namespace ProEventos.API.Controllers
@@ -20,22 +21,10 @@ namespace ProEventos.API.Controllers
         public IAccountService AccountService { get; } = _accountService;
 
         [HttpGet("All")]
-        public async Task<IActionResult> GetAll([FromQuery] PageParams pageParams)
+        public async Task<IActionResult> GetAll([FromQuery] PalestranteFiltroDto filtro)
         {
-            try
-            {
-                var palestrantes = await PalestranteService.GetAllPalestrantesAsync(pageParams, true);
-                if (palestrantes == null) return NoContent();
-
-                Response.AddPagination(palestrantes.CurrentPage, palestrantes.PageSize, palestrantes.TotalCount, palestrantes.TotalPages);
-
-                return Ok(palestrantes);
-            }
-            catch (Exception ex)
-            {
-                return this.StatusCode(StatusCodes.Status500InternalServerError,
-                    $"Erro ao tentar recuperar palestrantes. Erro: {ex.Message}");
-            }
+            var result = await PalestranteService.FiltrarAsync(filtro);
+            return Ok(result);
         }
 
         [HttpGet]
