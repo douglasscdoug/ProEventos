@@ -1,129 +1,123 @@
-using System;
 using AutoMapper;
+using Microsoft.Extensions.Logging;
 using ProEventos.Application.Contratos;
 using ProEventos.Application.Dtos;
+using ProEventos.Application.Exceptions;
 using ProEventos.Domain;
 using ProEventos.Persistence.Contratos;
 
 namespace ProEventos.Application;
 
-public class LoteService(IGeralPersist _geralPersist, ILotePersist _lotePersist, IMapper _mapper) : ILoteService
+public class LoteService(
+   IGeralPersist _geralPersist,
+   ILotePersist _lotePersist,
+   IMapper _mapper,
+   ILogger<LoteService> _logger,
+   IEventoPersist _eventoPersist) : ILoteService
 {
    public IGeralPersist GeralPersist { get; } = _geralPersist;
    public ILotePersist LotePersist { get; set; } = _lotePersist;
    public IMapper Mapper { get; } = _mapper;
-
-   public async Task<bool> DeleteLote(int eventoId, int loteId)
-   {
-      try
-      {
-         var lote = await LotePersist.GetLoteByIdsAsync(eventoId, loteId);
-         if (lote == null)
-         {
-            new Exception("Lote para delete não encontrado!");
-         }
-         else
-         {
-            GeralPersist.Delete<Lote>(lote);
-         }
-
-         return await GeralPersist.SaveChangesAsync();
-      }
-      catch (Exception ex)
-      {
-         throw new Exception(ex.Message);
-      }
-   }
-
-   public async Task<LoteDto?> GetLoteByIdsAsync(int eventoId, int loteId)
-   {
-      try
-      {
-         var lote = await LotePersist.GetLoteByIdsAsync(eventoId, loteId);
-         if (lote == null)
-         {
-            return null;
-         }
-
-         var resultado = Mapper.Map<LoteDto>(lote);
-
-         return resultado;
-      }
-      catch (Exception ex)
-      {
-         throw new Exception(ex.Message);
-      }
-   }
+   public ILogger<LoteService> Logger { get; } = _logger;
+   public IEventoPersist EventoPersist { get; } = _eventoPersist;
 
    public async Task<LoteDto[]?> GetLotesByEventoIdAsync(int eventoId)
    {
-      try
+      var lotes = await LotePersist.GetLotesByEventoIdAsync(eventoId);
+      if (lotes == null || lotes.Length == 0)
       {
-         var lotes = await LotePersist.GetLotesByEventoIdAsync(eventoId);
-         if (lotes == null)
+         Logger.LogInformation("Não foi encontrado lotes para o evento id: {EventoId}", eventoId);
+         return null;
+      }
+
+      var resultado = Mapper.Map<LoteDto[]>(lotes);
+
+      Logger.LogInformation("Consulta com sucesso de lotes para o evento id: {EventoId}", eventoId);
+
+      return resultado;
+   }
+
+   public async Task<LoteDto[]> SaveLotesAsync(int userId, int eventoId, LoteDto[] models)
+   {
+      Logger.LogInformation("Iniciando cadastro de lotes para o evento id: {EventoId}", eventoId);
+
+      var evento = await EventoPersist.GetEventoByIdAsync(userId, eventoId);
+      if (evento == null)
+      {
+         Logger.LogInformation("Tentativa de cadastro de lotes para evento inexistente.");
+         throw new BusinessException("Lotes", "Evento não encontrado");
+      }
+
+      var lotesExistentes = await LotePersist.GetLotesByEventoIdAsync(eventoId);
+
+      var lotesPorId = lotesExistentes.ToDictionary(l => l.Id);
+
+      foreach (var model in models)
+      {
+         if (model.Id == 0)
          {
-            return null;
+            ProcessarNovoLote(eventoId, model);
+            continue;
          }
 
-         var resultado = Mapper.Map<LoteDto[]>(lotes);
+         ProcessarAtualizacaoLote(eventoId, model, lotesPorId);
+      }
 
-         return resultado;
-      }
-      catch (Exception ex)
-      {
-         throw new Exception(ex.Message);
-      }
+      await GeralPersist.SaveChangesAsync();
+
+      var lotesRetorno = await LotePersist.GetLotesByEventoIdAsync(eventoId);
+
+      return Mapper.Map<LoteDto[]>(lotesRetorno);
    }
 
-   public async Task<LoteDto[]?> SaveLotes(int eventoId, LoteDto[] models)
+   public async Task<bool> DeleteLoteAsync(int eventoId, int loteId)
    {
-      try
-        {
-            var lotes = await LotePersist.GetLotesByEventoIdAsync(eventoId);
-            if(lotes == null) return null;
+      Logger.LogInformation(
+         "Iniciando exclusão de lote id: {LoteId} do evento id: {EventoID}",
+         loteId,
+         eventoId
+      );
 
-            foreach (var model in models)
-            {
-               if (model.Id == 0)
-               {
-                  await AddLote(eventoId, model);
-               }
-               else
-               {
-                  var lote = lotes.FirstOrDefault(l => l.Id == model.Id);
-                  model.EventoId = eventoId;
+      var lote = await LotePersist.GetLoteByIdsAsync(eventoId, loteId);
+      if (lote == null)
+      {
+         Logger.LogInformation("Tentativa de excluir lote inexistente.");
+         throw new BusinessException("Lote", "Lote para delete não encontrado!");
+      }
+      GeralPersist.Delete<Lote>(lote);
 
-                  Mapper.Map(model, lote);
+      var sucess = await GeralPersist.SaveChangesAsync();
 
-                  if(lote != null) GeralPersist.Update(lote);
+      if (sucess)
+         Logger.LogInformation(
+            "Lote id: {LoteId} do evento id: {EventoId} deletado com sucesso",
+            loteId,
+            eventoId
+         );
 
-                 await GeralPersist.SaveChangesAsync();
-               }
-            }
-            var lotesRetorno = await LotePersist.GetLotesByEventoIdAsync(eventoId);
-            return Mapper.Map<LoteDto[]>(lotesRetorno);
-        }
-        catch (Exception ex)
-        {
-            throw new Exception(ex.Message);
-        }
+      return sucess;
    }
 
-   public async Task AddLote (int eventoId, LoteDto model)
+   private void ProcessarNovoLote(int eventoId, LoteDto model)
    {
-      try
-      {
-         var lote = Mapper.Map<Lote>(model);
-         lote.EventoId = eventoId;
+      model.EventoId = eventoId;
 
-         GeralPersist.Add<Lote>(lote);
+      var lote = Mapper.Map<Lote>(model);
 
-         await GeralPersist.SaveChangesAsync();
-      }
-      catch (Exception ex)
-      {
-         
-         throw new Exception(ex.Message);
-      }
+      GeralPersist.Add(lote);
+   }
+
+   private void ProcessarAtualizacaoLote(int eventoId, LoteDto model, Dictionary<int, Lote> lotesPorId)
+   {
+      if (!lotesPorId.TryGetValue(model.Id, out var lote))
+         throw new BusinessException(
+             "Lotes",
+             $"Lote {model.Id} não encontrado para atualização");
+
+      model.EventoId = eventoId;
+
+      Mapper.Map(model, lote);
+
+      GeralPersist.Update(lote);
    }
 }

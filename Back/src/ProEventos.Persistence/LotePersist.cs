@@ -18,7 +18,7 @@ public class LotePersist(ProEventosContext _context) : ILotePersist
       return await query.FirstOrDefaultAsync();
    }
 
-   public async Task<Lote[]?> GetLotesByEventoIdAsync(int eventoId)
+   public async Task<Lote[]> GetLotesByEventoIdAsync(int eventoId)
    {
       IQueryable<Lote> query = Context.Lotes;
 
