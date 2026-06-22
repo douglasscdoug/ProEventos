@@ -59,6 +59,14 @@ Sistema web para gerenciamento de eventos desenvolvido com **Angular** e **.NET 
 
 ![Detalhes do Evento](./screenshots/detalhes-evento.png)
 
+### Listagem de palestrantes
+
+![Listagem de Palestrantes](./screenshots/palestrantes.png)
+
+### Perfil do usuário
+
+![Perfil do usuário](./screenshots/perfil.png)
+
 ---
 
 ## ⚙️ Como Executar o Projeto
