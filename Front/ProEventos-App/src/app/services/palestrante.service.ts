@@ -1,5 +1,6 @@
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { PagedResult } from '@app/models/paged-result';
 import { PaginatedResult } from '@app/models/Pagination';
 import { Palestrante } from '@app/models/Palestrante';
 import { map, Observable, take } from 'rxjs';
@@ -15,6 +16,20 @@ export class PalestranteService {
   public tokenHeader = new HttpHeaders({ 'Authorization': `Bearer ${this.token}` });
 
   constructor(private http: HttpClient) { }
+
+  public filtrar(filtro: any):Observable<PagedResult<Palestrante>>{
+    let params = new HttpParams;
+
+    Object.keys(filtro).forEach(key => {
+      const value = filtro[key];
+
+      if (value !== null && value !== '') {
+        params = params.set(key, value);
+      }
+    });
+
+    return this.http.get<PagedResult<Palestrante>>(this.baseURL + '/all', { params });
+  }
 
   public getPalestrantes(page?: number, itemsPerPage?: number, term?: string): Observable<PaginatedResult<Palestrante[]>> {
     const paginatedResult: PaginatedResult<Palestrante[]> = new PaginatedResult<Palestrante[]>();

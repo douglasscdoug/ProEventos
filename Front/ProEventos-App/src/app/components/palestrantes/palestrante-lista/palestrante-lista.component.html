@@ -5,36 +5,29 @@
         <div class="input-group-prepend">
           <div class="input-group-text">Filtro:</div>
         </div>
-        <input
-          type="text"
-          class="form-control me-2"
-          placeholder="Filtrar por nome e minicurriculo"
-          (input)="filtrarPalestrantes($event.target)"
-        />
+        <input type="text" class="form-control me-2" placeholder="Filtrar por nome e minicurriculo"
+          [formControl]="searchControl" />
       </div>
     </div>
   </div>
-  <div *ngIf="palestrantes && palestrantes.length" class="row mt-2">
-    <div
-      class="col-md-4 mb-4 d-flex align-items-stretch"
-      *ngFor="let palestrante of palestrantes"
-    >
+  @if (loading) {
+  <div class="text-center my-4">
+    <div class="spinner-border"></div>
+  </div>
+  }
+  @if(!loading && palestrantes && palestrantes.length){
+  <div class="row mt-2">
+    <div class="col-md-4 mb-4 d-flex align-items-stretch" *ngFor="let palestrante of palestrantes">
       <div class="card">
         <div class="d-flex align-self-center pt-3 card-img-block">
-          <img
-            width="120"
-            height="120"
-            class="rounded-circle"
-            [src]="getImagemUrl(palestrante.user.imagemUrl)"
-          />
+          <img width="120" height="120" class="rounded-circle" [src]="getImagemUrl(palestrante.user.imagemUrl)" />
         </div>
         <div class="card-body">
           <div class="h4 text-center mb-3">
             {{ "@" + palestrante.user.userName }}
           </div>
           <div class="h7 text-bold pb-1">
-            <b>Nome: </b
-            >{{ palestrante.user.nome + " " + palestrante.user.sobrenome }}
+            <b>Nome: </b>{{ palestrante.user.nome + " " + palestrante.user.sobrenome }}
           </div>
           <div class="h7">
             {{ palestrante.miniCurriculo }}
@@ -57,11 +50,29 @@
       </div>
     </div>
   </div>
-  <div class="d-flex justify-content-center">
+  }
+  <div class="d-flex justify-content-between align-items-center mt-3">
+    <div>
+      <span> Exibindo {{ palestrantes.length }} de {{ total }} registros </span>
+    </div>
+    <div class="d-flex align-items-center gap-3">
+      <div>
+        <label class="me-2">Itens por página:</label>
+        <select
+          class="form-select d-inline w-auto"
+          [value]="pageSize"
+          (change)="onPageSizeChange($event)"
+        >
+          <option [value]="3">3</option>
+          <option [value]="6">6</option>
+          <option [value]="12">12</option>
+        </select>
+      </div>
+    </div>
     <pagination
       [boundaryLinks]="true"
-      [totalItems]="pagination.totalItems"
-      [itemsPerPage]="pagination.itemsPerPage"
+      [totalItems]="total"
+      [itemsPerPage]="pageSize"
       (pageChanged)="pageChanged($event)"
       pageBtnClass="btn"
       previousText="&lsaquo;"
@@ -69,6 +80,14 @@
       firstText="&laquo;"
       lastText="&raquo;"
     >
+    </pagination>
+  </div>
+
+
+  <div class="d-flex justify-content-center">
+    <pagination [boundaryLinks]="true" [totalItems]="pagination.totalItems" [itemsPerPage]="pagination.itemsPerPage"
+      (pageChanged)="pageChanged($event)" pageBtnClass="btn" previousText="&lsaquo;" nextText="&rsaquo;"
+      firstText="&laquo;" lastText="&raquo;">
     </pagination>
   </div>
 </div>
