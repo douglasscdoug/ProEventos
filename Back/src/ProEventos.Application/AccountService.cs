@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 using ProEventos.Application.Contratos;
 using ProEventos.Application.Dtos;
 using ProEventos.Application.Exceptions;
+using ProEventos.Domain;
 using ProEventos.Domain.Identity;
 using ProEventos.Persistence.Contratos;
 
@@ -16,7 +17,9 @@ public class AccountService(
    IMapper _mapper,
    IUserPersist _userPersist,
    ILogger<AccountService> _logger,
-   ITokenService _tokenService
+   ITokenService _tokenService,
+   IRefreshTokenPersist _refreshTokenPersist,
+   IGeralPersist _geralPersist
 ) : IAccountService
 {
    public UserManager<User> UserManager { get; } = _userManager;
@@ -25,8 +28,10 @@ public class AccountService(
    public IUserPersist UserPersist { get; } = _userPersist;
    public ILogger Logger { get; } = _logger;
    public ITokenService TokenService { get; set; } = _tokenService;
+   public IRefreshTokenPersist RefreshTokenPersist { get; } = _refreshTokenPersist;
+   public IGeralPersist GeralPersist { get; } = _geralPersist;
 
-   public async Task<LoginResponseDto> LoginAsync(UserLoginDto userLogin)
+    public async Task<LoginResponseDto> LoginAsync(UserLoginDto userLogin)
    {
       var user = await UserManager.Users.SingleOrDefaultAsync(u => u.UserName == userLogin.UserName);
 
@@ -37,6 +42,17 @@ public class AccountService(
       if (!result.Succeeded) throw new UnauthorizedException("Usuário ou senha inválidos");
 
       var token = await TokenService.CreateToken(user);
+      var refreshToken = TokenService.GenerateRefreshToken();
+
+      var refreshTokenEntity = new RefreshToken
+      {
+         Token = refreshToken,
+         UserId = user.Id,
+         ExpirationDate = DateTime.UtcNow.AddDays(7)
+      };
+
+      GeralPersist.Add(refreshTokenEntity);
+      await GeralPersist.SaveChangesAsync();
 
       Logger.LogInformation(
          "Login realizado com sucesso para o usuário {UserName}",
@@ -47,7 +63,8 @@ public class AccountService(
       {
          UserName = user.UserName!,
          Nome = user.Nome,
-         Token = token
+         Token = token,
+         RefreshToken = refreshToken
       };
    }
 
@@ -68,6 +85,17 @@ public class AccountService(
       }
 
       var token = await TokenService.CreateToken(user);
+      var refreshToken = TokenService.GenerateRefreshToken();
+
+      var refreshTokenEntity = new RefreshToken
+      {
+         Token = refreshToken,
+         UserId = user.Id,
+         ExpirationDate = DateTime.UtcNow.AddDays(7)
+      };
+
+      GeralPersist.Add(refreshTokenEntity);
+      await GeralPersist.SaveChangesAsync();
 
       Logger.LogInformation(
             "Novo usuário criado com o userName: {UserName}",
@@ -78,9 +106,59 @@ public class AccountService(
       {
          UserName = user.UserName!,
          Nome = user.Nome,
-         Token = token
+         Token = token,
+         RefreshToken = refreshToken
       };
    }
+
+   public async Task<LoginResponseDto> RefreshTokenAsync(string refreshToken)
+    {
+        Logger.LogInformation("Iniciando processo de refresh token.");
+        var token = await RefreshTokenPersist.GetByTokenAsync(refreshToken);
+
+        if (token == null)
+        {
+            Logger.LogWarning("Tentativa de refresh token com token inexistente.");
+            throw new UnauthorizedException("Refresh token inválido.");
+        }
+        if (token.Revoked)
+        {
+            Logger.LogWarning("Tentativa de refresh token com token revogado.");
+            throw new UnauthorizedException("Refresh token revogado.");
+        }
+        if (token.ExpirationDate < DateTime.UtcNow)
+        {
+            Logger.LogWarning("Tentativa de refresh token com token expirado.");
+            throw new UnauthorizedException("Refresh token expirado.");
+        }
+
+        token.Revoked = true;
+
+        var novoAccessToken = await TokenService.CreateToken(token.User);
+        var novoRefreshToken = TokenService.GenerateRefreshToken();
+
+        GeralPersist.Add(new RefreshToken
+        {
+            Token = novoRefreshToken,
+            UserId = token.UserId,
+            ExpirationDate = DateTime.UtcNow.AddDays(7)
+        });
+
+        await GeralPersist.SaveChangesAsync();
+
+        _logger.LogInformation(
+            "Refresh token realizado com sucesso para usuário {UsuarioId}",
+            token.UserId
+        );
+
+        return new LoginResponseDto
+      {
+         UserName = token.User.UserName!,
+         Nome = token.User.Nome,
+         Token = novoAccessToken,
+         RefreshToken = novoRefreshToken
+      };
+    }
 
    public async Task<LoginResponseDto> UpdateUserAsync(UserUpdateDto userUpdateDto, string loggedUserName)
    {

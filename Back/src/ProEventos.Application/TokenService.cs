@@ -1,6 +1,7 @@
 using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 using AutoMapper;
 using Microsoft.AspNetCore.Identity;
@@ -50,7 +51,7 @@ public class TokenService : ITokenService
       var tokenDescription = new SecurityTokenDescriptor
       {
          Subject = new ClaimsIdentity(claims),
-         Expires = DateTime.Now.AddDays(1),
+         Expires = DateTime.Now.AddMinutes(30),
          SigningCredentials = creds
       };
 
@@ -60,4 +61,9 @@ public class TokenService : ITokenService
 
       return tokenHandler.WriteToken(token);
    }
+
+    public string GenerateRefreshToken()
+    {
+        return Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
+    }
 }

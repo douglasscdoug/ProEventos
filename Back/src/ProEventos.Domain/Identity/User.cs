@@ -12,4 +12,5 @@ public class User : IdentityUser<int>
    public Funcao Funcao { get; set; }
    public string ? ImagemURL { get; set; }
    public IEnumerable<UserRole> UserRoles { get; set; }
+   public ICollection<RefreshToken> RefreshTokens { get; set; } = new List<RefreshToken>();
 }

@@ -83,6 +83,7 @@ builder.Services.AddScoped<ILotePersist, LotePersist>();
 builder.Services.AddScoped<IUserPersist, UserPersist>();
 builder.Services.AddScoped<IPalestrantePersist, PalestrantePersist>();
 builder.Services.AddScoped<IRedeSocialPersist, RedeSocialPersist>();
+builder.Services.AddScoped<IRefreshTokenPersist, RefreshTokenPersist>();
 
 builder.Services.Configure<JsonOptions>(options =>
 {

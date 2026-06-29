@@ -13,10 +13,13 @@ public class ProEventosContext(DbContextOptions<ProEventosContext> options) : Id
     public DbSet<Palestrante> Palestrantes { get; set; }
     public DbSet<PalestranteEvento> PalestrantesEventos { get; set; }
     public DbSet<RedeSocial> RedesSociais { get; set; }
+    public DbSet<RefreshToken> RefreshTokens { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+
+        modelBuilder.Entity<RefreshToken>().HasOne(rt => rt.User).WithMany(u => u.RefreshTokens).HasForeignKey(rt => rt.UserId);
 
         modelBuilder.Entity<UserRole>(userRole =>
         {

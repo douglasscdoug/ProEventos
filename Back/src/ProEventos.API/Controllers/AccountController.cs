@@ -36,6 +36,13 @@ namespace ProEventos.API.Controllers
             return Ok(result);
         }
 
+        [HttpPost("Refresh")]
+        public async Task<IActionResult> Refresh([FromBody] RefreshTokenRequestDto request)
+        {
+            var response = await AccountService.RefreshTokenAsync(request.RefreshToken);
+            return Ok(response);
+        }
+
         [HttpPut("UpdateUser")]
         public async Task<IActionResult> UpdateUser(UserUpdateDto userUpdateDto)
         {

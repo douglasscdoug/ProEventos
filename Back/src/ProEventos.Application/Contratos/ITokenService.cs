@@ -5,4 +5,5 @@ namespace ProEventos.Application.Contratos;
 public interface ITokenService
 {
    Task<string> CreateToken(User user);
+   string GenerateRefreshToken();
 }
