@@ -37,6 +37,7 @@ namespace ProEventos.API.Controllers
         }
 
         [HttpPost("Refresh")]
+        [AllowAnonymous]
         public async Task<IActionResult> Refresh([FromBody] RefreshTokenRequestDto request)
         {
             var response = await AccountService.RefreshTokenAsync(request.RefreshToken);

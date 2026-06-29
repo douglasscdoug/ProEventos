@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using ProEventos.API.Extensions;
@@ -9,6 +10,7 @@ using ProEventos.Persistence.Models;
 namespace ProEventos.API.Controllers
 {
     [Route("api/[controller]")]
+    [Authorize]
     [ApiController]
     public class PalestrantesController(
         IPalestranteService _palestranteService,

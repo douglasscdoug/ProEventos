@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using ProEventos.API.Extensions;
@@ -7,6 +8,7 @@ using ProEventos.Application.Dtos;
 namespace ProEventos.API.Controllers;
 
 [Route("api/[controller]")]
+[Authorize]
 [ApiController]
 public class LotesController(ILoteService _loteService) : ControllerBase
 {

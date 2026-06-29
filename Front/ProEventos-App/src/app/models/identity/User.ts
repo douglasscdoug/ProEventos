@@ -5,4 +5,5 @@ export class User {
    nome?: string;
    sobrenome?: string;
    token?: string;
+   refreshToken?: string;
 }

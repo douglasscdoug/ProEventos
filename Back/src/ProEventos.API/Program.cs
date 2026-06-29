@@ -60,10 +60,12 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     {
         options.TokenValidationParameters = new TokenValidationParameters
         {
-            ValidateIssuerSigningKey = true,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["TokenKey"] ?? throw new InvalidOperationException("TokenKey is missing in configuration."))),
             ValidateIssuer = false,
-            ValidateAudience = false            
+            ValidateAudience = false,            
+            ValidateIssuerSigningKey = true,
+            ValidateLifetime = true,
+
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["TokenKey"] ?? throw new InvalidOperationException("TokenKey is missing in configuration."))),
         };
     });
 
