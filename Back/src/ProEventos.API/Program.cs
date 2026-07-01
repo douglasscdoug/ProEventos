@@ -33,9 +33,24 @@ Log.Logger = new LoggerConfiguration()
 
 builder.Host.UseSerilog();
 
-builder.Services.AddDbContext<ProEventosContext>(
-    options => options.UseSqlServer(builder.Configuration.GetConnectionString("Default"))
-);
+var provider = builder.Configuration["DatabaseProvider"];
+
+builder.Services.AddDbContext<ProEventosContext>(options =>
+{
+    switch (provider)
+    {
+        case "SqlServer":
+            options.UseSqlServer(builder.Configuration.GetConnectionString("SqlServerConnection"));
+            break;
+
+        case "Postgres":
+            options.UseNpgsql(builder.Configuration.GetConnectionString("PostGresConnection"));
+            break;
+
+        default:
+            throw new InvalidOperationException("Database provider não configurado.");
+    }
+});
 
 builder.Services.AddControllers();
 
