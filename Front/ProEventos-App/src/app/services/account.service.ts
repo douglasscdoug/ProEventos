@@ -67,6 +67,8 @@ export class AccountService {
         const user = response;
         if (user) {
           this.setCurrentUser(user);
+          this.setToken(user.token!);
+          this.setRefreshToken(user.refreshToken!);
         }
       })
     );
