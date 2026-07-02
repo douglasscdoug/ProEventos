@@ -1,4 +1,4 @@
 export const environment = {
    production: true,
-   apiUrl: 'https://api-prod.example.com', // Exemplo de variável
+   apiUrl: 'https://proeventos-production.up.railway.app/', // Exemplo de variável
  }; 
