@@ -123,7 +123,7 @@ builder.Services.AddCors(options =>
         policy =>
         {
             policy
-                .WithOrigins("http://localhost:4200", "https://sistema-administrativo-de-empresas.vercel.app")
+                .WithOrigins("http://localhost:4200", "https://pro-eventos-swart.vercel.app")
                 .AllowAnyHeader()
                 .AllowAnyMethod();
         });
