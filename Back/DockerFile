@@ -1,7 +1,7 @@
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
-COPY . .
+COPY Back/ .
 
 RUN dotnet restore src/ProEventos.API/ProEventos.API.csproj
 RUN dotnet publish src/ProEventos.API/ProEventos.API.csproj -c Release -o /app/publish
