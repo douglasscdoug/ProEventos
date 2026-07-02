@@ -1,6 +1,6 @@
-using System;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using ProEventos.Application.Common.Utils;
@@ -9,18 +9,18 @@ using ProEventos.Application.Dtos;
 using ProEventos.Application.Exceptions;
 using ProEventos.Application.Filters;
 using ProEventos.Domain;
-using ProEventos.Persistence;
 using ProEventos.Persistence.Contratos;
-using ProEventos.Persistence.Models;
 
 namespace ProEventos.Application;
 
 public class EventoService(
+   IPhotoService photoService,
    IGeralPersist geralPersist,
    IEventoPersist eventoPersist,
    IMapper mapper,
    ILogger<EventoService> logger) : IEventoService
 {
+   public IPhotoService PhotoService { get; } = photoService;
    public IGeralPersist GeralPersist { get; } = geralPersist;
    public IEventoPersist EventoPersist { get; } = eventoPersist;
    public IMapper Mapper { get; } = mapper;
@@ -161,13 +161,32 @@ public class EventoService(
       return Mapper.Map<EventoDto>(eventoRetorno);
    }
 
-   public async Task<EventoDto> UploadImageAsync(int userId, int eventoId, string imagemUrl)
+   public async Task<EventoDto> UploadImageAsync(int userId, int eventoId, IFormFile file)
    {
       var evento = await EventoPersist.GetEventoByIdAsync(userId, eventoId);
 
       if (evento == null) throw new BusinessException("Evento", "Evento não encontrado");
 
-      evento.ImagemUrl = imagemUrl;
+      if(file == null || file.Length == 0)
+         throw new BusinessException("Evento", "Arquivo de imagem inválido");
+
+      await using var stream = file.OpenReadStream();
+
+      var uploadResult = await PhotoService.UploadImageAsync(stream, file.FileName, "proEventos/images");
+
+      if(uploadResult == null)
+         throw new BusinessException("Evento", "Erro ao fazer upload da imagem");
+
+      if(!string.IsNullOrEmpty(evento.ImagemPublicId))
+      {
+         var deleteResult = await PhotoService.DeleteImageAsync(evento.ImagemPublicId);
+
+         if(!deleteResult)
+            Logger.LogWarning("Falha ao deletar imagem antiga do evento id: {EventoId}", eventoId);
+      }
+
+      evento.ImagemUrl = uploadResult.Url;
+      evento.ImagemPublicId = uploadResult.PublicId;
 
       GeralPersist.Update<Evento>(evento);
 

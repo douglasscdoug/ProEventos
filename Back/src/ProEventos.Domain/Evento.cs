@@ -10,6 +10,7 @@ public class Evento
    public DateTime ? DataEvento { get; set; }
    public int QtdPessoas { get; set; }
    public string ? ImagemUrl { get; set; }
+   public string ? ImagemPublicId { get; set; }
    public string ? Telefone { get; set; }
    public string ? Email { get; set; }
    public int UserId { get; set; }

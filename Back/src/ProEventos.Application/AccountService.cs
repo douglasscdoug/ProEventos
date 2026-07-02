@@ -1,4 +1,5 @@
 using AutoMapper;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -19,7 +20,8 @@ public class AccountService(
    ILogger<AccountService> _logger,
    ITokenService _tokenService,
    IRefreshTokenPersist _refreshTokenPersist,
-   IGeralPersist _geralPersist
+   IGeralPersist _geralPersist,
+   IPhotoService _photoService
 ) : IAccountService
 {
    public UserManager<User> UserManager { get; } = _userManager;
@@ -30,6 +32,7 @@ public class AccountService(
    public ITokenService TokenService { get; set; } = _tokenService;
    public IRefreshTokenPersist RefreshTokenPersist { get; } = _refreshTokenPersist;
    public IGeralPersist GeralPersist { get; } = _geralPersist;
+   public IPhotoService PhotoService { get; } = _photoService;
 
     public async Task<LoginResponseDto> LoginAsync(UserLoginDto userLogin)
    {
@@ -221,18 +224,39 @@ public class AccountService(
          return userUpdateDto;
    }
 
-    public async Task<UserUpdateDto> UpdateProfileImageAsync(string userName, string imagemUrl)
+    public async Task<UserUpdateDto> UpdateProfileImageAsync(string userName, IFormFile file)
     {
 
       var user = await UserPersist.GetUserByUserNameAsync(userName);
 
       if (user == null) throw new BusinessException("User", "Usuário não encontrado");
 
-      user.ImagemURL = imagemUrl;
+      if(file == null || file.Length == 0)
+         throw new BusinessException("User", "Arquivo de imagem inválido");
+
+      await using var stream = file.OpenReadStream();
+
+      var uploadResult = await PhotoService.UploadImageAsync(stream, file.FileName, "proEventos/perfil");
+
+      if(uploadResult == null)
+         throw new BusinessException("User", "Erro ao fazer upload da imagem");
+
+      if(!string.IsNullOrEmpty(user.ImagemPublicId))
+      {
+         var deleteResult = await PhotoService.DeleteImageAsync(user.ImagemPublicId);
+
+         if(!deleteResult)
+            Logger.LogWarning("Falha ao deletar imagem antiga do usuário id: {UserID}", user.Id);
+      }
+
+      user.ImagemURL = uploadResult.Url;
+      user.ImagemPublicId = uploadResult.PublicId;
 
       var result = await UserManager.UpdateAsync(user);
 
       if (!result.Succeeded) throw new BusinessException("User", result.Errors.First().Description);
+
+      Logger.LogInformation("Imagem de perfil do usuário id: {UserID} atualizada com sucesso.", user.Id);
 
       return Mapper.Map<UserUpdateDto>(user);
     }

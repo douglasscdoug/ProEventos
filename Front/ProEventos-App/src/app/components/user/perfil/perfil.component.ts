@@ -38,7 +38,7 @@ export class PerfilComponent implements OnInit {
   public setFormValue(usuario: UserUpdate): void {
     this.usuario = usuario;
     if(usuario.imagemUrl)
-      this.imagemURL = environment.apiUrl + `resources/perfil/${this.usuario.imagemUrl}`;
+      this.imagemURL = this.usuario.imagemUrl!;
     else
       this.imagemURL = './assets/images/perfil.png';
   }

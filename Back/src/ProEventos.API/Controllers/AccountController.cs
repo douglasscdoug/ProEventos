@@ -18,7 +18,6 @@ namespace ProEventos.API.Controllers
         public IAccountService AccountService { get; } = accountService;
         public ITokenService TokenService { get; } = tokenService;
         public IUtil Util { get; } = _util;
-        private readonly string _destino = "Perfil";
 
         [HttpPost("Login")]
         [AllowAnonymous]
@@ -64,29 +63,8 @@ namespace ProEventos.API.Controllers
         [HttpPost("upload-image")]
         public async Task<IActionResult> UploadImage(IFormFile file)
         {
-            if (file == null) throw new BusinessException("File", "Nenhum arquivo foi enviado.");
-
-            var user = await AccountService.GetUserByUserNameAsync(User.GetUserName());
-
-            if (user == null) throw new BusinessException("User", "Usuário não encontrado.");
-
-            var oldImage = user.ImagemUrl;
-            var newImage = await Util.SaveImage(file, _destino);
-
-            try
-            {
-                var result = await AccountService.UpdateProfileImageAsync(user.UserName!, newImage);
-
-                if (!string.IsNullOrWhiteSpace(oldImage)) Util.DeleteImage(oldImage, _destino);
-
-                return Ok(result);
-            }
-            catch
-            {
-                if (!string.IsNullOrWhiteSpace(newImage)) Util.DeleteImage(newImage, _destino);
-
-                throw;
-            }
+            var result = await AccountService.UpdateProfileImageAsync(User.GetUserName(), file);
+            return Ok(result);
         }
     }
 }

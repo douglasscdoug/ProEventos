@@ -18,6 +18,8 @@ using Microsoft.OpenApi.Models;
 using ProEventos.API.Helpers;
 using Serilog;
 using ProEventos.API.Middlewares;
+using ProEventos.Persistence.Services;
+using ProEventos.Domain.Configurations;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -84,6 +86,9 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
+builder.Services.Configure<CloudinarySettings>(
+    builder.Configuration.GetSection("Cloudinary"));
+
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
 builder.Services.AddScoped<IEventoService, EventoService>();
@@ -101,6 +106,8 @@ builder.Services.AddScoped<IUserPersist, UserPersist>();
 builder.Services.AddScoped<IPalestrantePersist, PalestrantePersist>();
 builder.Services.AddScoped<IRedeSocialPersist, RedeSocialPersist>();
 builder.Services.AddScoped<IRefreshTokenPersist, RefreshTokenPersist>();
+
+builder.Services.AddScoped<IPhotoService, CloudinaryService>();
 
 builder.Services.Configure<JsonOptions>(options =>
 {
@@ -167,10 +174,10 @@ app.UseHttpsRedirection();
 
 app.UseCors("AllowAllOrigins");
 
-app.UseStaticFiles(new StaticFileOptions() {
-    FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "Resources")),
-    RequestPath = new PathString("/Resources")
-});
+// app.UseStaticFiles(new StaticFileOptions() {
+//     FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "Resources")),
+//     RequestPath = new PathString("/Resources")
+// });
 
 app.UseAuthentication();
 app.UseAuthorization();

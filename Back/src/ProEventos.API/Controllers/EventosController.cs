@@ -22,7 +22,6 @@ public class EventosController(
     public IEventoService EventoService { get; } = _eventoService;
     public IUtil Util { get; } = _util;
     public IAccountService AccountService { get; } = _accountService;
-    private readonly string _destino = "Images";
 
     [HttpGet]
     public async Task<IActionResult> Get([FromQuery] EventoFiltroDto filtro)
@@ -60,28 +59,9 @@ public class EventosController(
     [HttpPost("upload-image/{eventoId}")]
     public async Task<IActionResult> UploadImage(int eventoId, IFormFile file)
     {
-        if (file == null) throw new BusinessException("File", "Nenhum arquivo foi enviado.");
+        var result = await EventoService.UploadImageAsync(User.GetUserId(), eventoId, file);
 
-        var evento = await EventoService.GetEventoByIdAsync(User.GetUserId(), eventoId, false);
-
-        if (evento == null) throw new BusinessException("Evento", "Evento não encontrado");
-
-        var oldImage = evento.ImagemUrl;
-        var newImage = await Util.SaveImage(file, _destino);
-
-        try
-        {
-            var result = await EventoService.UploadImageAsync(User.GetUserId(), eventoId, newImage);
-
-            if (!string.IsNullOrWhiteSpace(oldImage)) Util.DeleteImage(oldImage, _destino);
-
-            return Ok(result);
-        }
-        catch
-        {
-            if (!string.IsNullOrWhiteSpace(newImage)) Util.DeleteImage(newImage, _destino);
-            throw;
-        }
+        return Ok(result);
     }
 
     [HttpPut("palestrantes/{eventoId}")]

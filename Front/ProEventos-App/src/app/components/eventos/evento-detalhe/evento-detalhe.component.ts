@@ -147,7 +147,7 @@ export class EventoDetalheComponent implements OnInit {
           this.eventoForm.patchValue(this.evento);
 
           if(this.evento.imagemUrl !== ''){
-            this.imagemURL = environment.apiUrl + 'resources/images/' + this.evento.imagemUrl;
+            this.imagemURL = this.evento.imagemUrl;
           }
 
           this.carregarLotes();
@@ -310,11 +310,11 @@ export class EventoDetalheComponent implements OnInit {
     this.bsModalRef.hide();
   }
 
-  public getImagemUrl(imagemName: string | any): string {
-    if(imagemName) 
-      return environment.apiUrl + `resources/perfil/${imagemName}`;
-    else
-      return './assets/images/perfil.png';
+  public getImagemUrl(imagemUrl: string | null | undefined): string {
+    if(imagemUrl) 
+      return imagemUrl;
+
+    return './assets/images/perfil.png';
   }
 
   public removerPalestrante(palestranteId: number): void {

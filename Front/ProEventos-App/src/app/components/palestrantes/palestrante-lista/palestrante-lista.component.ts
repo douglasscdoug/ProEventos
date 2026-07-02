@@ -78,26 +78,13 @@ export class PalestranteListaComponent implements OnInit {
     this.termoBuscaChanged.next(evt.value);
   }
 
-  public getImagemUrl(imagemName: string | any): string {
-    if (imagemName)
-      return environment.apiUrl + `resources/perfil/${imagemName}`;
-    else
-      return './assets/images/perfil.png';
-  }
+  public getImagemUrl(imagemUrl: string | any): string {
+    if (imagemUrl)
+      return imagemUrl;
 
-  public carregarPalestrantes(): void {
-    this.palestranteService.getPalestrantes(this.pagination.currentPage, this.pagination.itemsPerPage).subscribe({
-      next: (response: PaginatedResult<Palestrante[]>) => {
-        this.palestrantes = response.result ?? [];
-        this.pagination = response.pagination ?? new Pagination;
-      },
-      error: (error) => {
-        this.spinner.hide();
-        this.toastr.error('Erro ao carregar os palestrantes', 'Erro')
-      }
-    }).add(() => this.spinner.hide());
+    return './assets/images/perfil.png';
   }
-
+  
   public pageChanged(event: PageChangedEvent): void {
     this.page = event.page;
     this.buscar(this.searchControl.value);

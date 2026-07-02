@@ -120,21 +120,8 @@ export class EventoListaComponent implements OnInit {
 
   public mostraImagem(imagemURL: string): string {
     return (imagemURL !== '')
-      ? `${environment.apiUrl}resources/images/${imagemURL}`
+      ? imagemURL
       : 'assets/images/semImagem.jpeg';
-  }
-
-  public carregarEventos(): void {
-    this.eventoService.getEventos(this.pagination.currentPage, this.pagination.itemsPerPage).subscribe({
-      next: (response: PaginatedResult<Evento[]>) => {
-        this.eventos = response.result ?? [];
-        this.pagination = response.pagination ?? new Pagination;
-      },
-      error: (error) => {
-        this.spinner.hide();
-        this.toastr.error('Erro ao carregar os eventos', 'Erro')
-      }
-    }).add(() => this.spinner.hide());
   }
 
   openModal(event: any, template: TemplateRef<void>, eventoId: number) {

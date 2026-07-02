@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Http;
 using ProEventos.Application.Dtos;
 
 namespace ProEventos.Application.Contratos
@@ -9,6 +10,6 @@ namespace ProEventos.Application.Contratos
         Task<LoginResponseDto> RefreshTokenAsync(string refreshToken);
         Task<LoginResponseDto> UpdateUserAsync(UserUpdateDto userUpdateDto, string loggedUserName);
         Task<UserUpdateDto> GetUserByUserNameAsync(string userName);
-        Task<UserUpdateDto> UpdateProfileImageAsync(string userName, string imagemUrl);
+        Task<UserUpdateDto> UpdateProfileImageAsync(string userName, IFormFile file);
     }
 }
