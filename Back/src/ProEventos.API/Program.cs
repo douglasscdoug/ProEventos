@@ -119,10 +119,14 @@ builder.Services.Configure<JsonOptions>(options =>
 
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowAllOrigins",
-        builder => builder.AllowAnyOrigin()
-                          .AllowAnyHeader()
-                          .AllowAnyMethod());
+    options.AddPolicy("CorsPolicy",
+        policy =>
+        {
+            policy
+                .WithOrigins("http://localhost:4200", "https://sistema-administrativo-de-empresas.vercel.app")
+                .AllowAnyHeader()
+                .AllowAnyMethod();
+        });
 });
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -159,25 +163,22 @@ builder.Services.AddSwaggerGen(c =>
 
 var app = builder.Build();
 
+using(var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<ProEventosContext>();
+    db.Database.Migrate();
+}
+
 app.UseMiddleware<RequestLoggingMiddleware>();
 
 app.UseMiddleware<ExceptionMiddleware>();
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+app.UseSwagger();
+app.UseSwaggerUI();
 
 app.UseHttpsRedirection();
 
-app.UseCors("AllowAllOrigins");
-
-// app.UseStaticFiles(new StaticFileOptions() {
-//     FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "Resources")),
-//     RequestPath = new PathString("/Resources")
-// });
+app.UseCors("CorsPolicy");
 
 app.UseAuthentication();
 app.UseAuthorization();
