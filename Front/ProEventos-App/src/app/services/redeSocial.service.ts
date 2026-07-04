@@ -19,11 +19,7 @@ export class RedeSocialService {
    * @returns Observable<RedeSocial[]>
    */
   public getRedesSociais(origem: string, id: number): Observable<RedeSocial[]> {
-    let URL = id == 0 
-      ? `${this.baseURL}/${origem}`
-      : `${this.baseURL}/${origem}/${id}`
-
-    return this.http.get<RedeSocial[]>(URL).pipe(take(1));
+    return this.http.get<RedeSocial[]>(this.baseURL + '/' + origem + '/' + id).pipe(take(1));
   }
 
   /**
@@ -34,11 +30,7 @@ export class RedeSocialService {
    * @returns Observable<RedeSocial[]>
    */
   public saveRedesSociais(origem: string, id: number, redesSociais: RedeSocial[]): Observable<RedeSocial[]> {
-    let URL = id == 0 
-      ? `${this.baseURL}/${origem}`
-      : `${this.baseURL}/${origem}/${id}`
-
-    return this.http.put<RedeSocial[]>(URL, redesSociais).pipe(take(1));
+    return this.http.put<RedeSocial[]>(this.baseURL + '/' + origem + '/' + id, redesSociais).pipe(take(1));
   }
 
   /**
@@ -49,10 +41,6 @@ export class RedeSocialService {
    * @returns Observable<any>
    */
   public deleteRedeSocial(origem: string, id: number, redeSocialId: number): Observable<any> {
-    let URL = id == 0 
-      ? `${this.baseURL}/${origem}/${redeSocialId}`
-      : `${this.baseURL}/${origem}/${id}/${redeSocialId}`
-
-    return this.http.delete(URL).pipe(take(1));
+    return this.http.delete(this.baseURL + '/' + origem + '/' + id + '/' + redeSocialId).pipe(take(1));
   }
 }

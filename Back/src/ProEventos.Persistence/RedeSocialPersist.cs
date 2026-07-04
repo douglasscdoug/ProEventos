@@ -7,7 +7,7 @@ namespace ProEventos.Persistence;
 
 public class RedeSocialPersist(ProEventosContext _context) : GeralPersist(_context), IRedeSocialPersist
 {
-    public async Task<RedeSocial[]?> GetAllByEventoIdAsync(int eventoId)
+    public async Task<RedeSocial[]> GetAllByEventoIdAsync(int eventoId)
     {
         IQueryable<RedeSocial> query = Context.RedesSociais;
 
@@ -16,7 +16,7 @@ public class RedeSocialPersist(ProEventosContext _context) : GeralPersist(_conte
         return await query.ToArrayAsync();
     }
 
-    public async Task<RedeSocial[]?> GetAllByPalestranteIdAsync(int palestranteId)
+    public async Task<RedeSocial[]> GetAllByPalestranteIdAsync(int palestranteId)
     {
         IQueryable<RedeSocial> query = Context.RedesSociais;
 

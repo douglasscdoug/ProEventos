@@ -4,12 +4,11 @@ namespace ProEventos.Application.Contratos;
 
 public interface IRedeSocialService
 {
-    Task<RedeSocialDto[]?> SaveByEvento(int eventoId, RedeSocialDto[] models);
-    Task<bool> DeleteByEvento(int eventoId, int redeSocialId);
-    Task<RedeSocialDto[]?> SaveByPalestrante(int palestranteId, RedeSocialDto[] models);
-    Task<bool> DeleteByPalestrante(int palestranteId, int redeSocialId);
-    Task<RedeSocialDto[]?> GetAllByEventoIdAsync(int eventoId);
-    Task<RedeSocialDto[]?> GetAllByPalestranteIdAsync(int palestranteId);
-    Task<RedeSocialDto?> GetRedeSocialEventoByIdsAsync(int eventoId, int redeSocialId);
-    Task<RedeSocialDto?> GetRedeSocialPalestranteByIdsAsync(int palestranteId, int redeSocialId);
+    //Refatorados
+    Task<RedeSocialDto[]> SaveByEventoAsync(int userId, int eventoId, RedeSocialDto[] models);
+    Task<RedeSocialDto[]> SaveByPalestranteAsync(int userId, int palestranteId, RedeSocialDto[] models);
+    Task<RedeSocialDto[]> GetAllByEventoIdAsync(int userId, int eventoId);
+    Task<RedeSocialDto[]> GetAllByPalestranteIdAsync(int userId,int palestranteId);
+    Task DeleteByEventoAsync(int userId, int eventoId, int redeSocialId);
+    Task DeleteByPalestranteAsync(int userId, int palestranteId, int redeSocialId);
 }

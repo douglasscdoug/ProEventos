@@ -1,232 +1,175 @@
 using System;
 using AutoMapper;
+using Microsoft.Extensions.Logging;
 using ProEventos.Application.Contratos;
 using ProEventos.Application.Dtos;
+using ProEventos.Application.Exceptions;
 using ProEventos.Domain;
 using ProEventos.Persistence.Contratos;
 
 namespace ProEventos.Application;
 
-public class RedeSocialService(IRedeSocialPersist _redeSocialPersist, IMapper _mapper) : IRedeSocialService
+public class RedeSocialService(
+    IRedeSocialPersist _redeSocialPersist,
+    IMapper _mapper,
+    IEventoPersist _eventoPersist,
+    IPalestrantePersist _palestrantePersist,
+    ILogger<RedeSocialService> _logger) : IRedeSocialService
 {
     public IRedeSocialPersist RedeSocialPersist { get; } = _redeSocialPersist;
     public IMapper Mapper { get; } = _mapper;
+    public IEventoPersist EventoPersist { get; } = _eventoPersist;
+    public IPalestrantePersist PalestrantePersist { get; } = _palestrantePersist;
+    public ILogger<RedeSocialService> Logger { get; } = _logger;
 
-    public async Task AddRedeSocial(int id, RedeSocialDto model, bool isEvento)
+    public async Task<RedeSocialDto[]> SaveByEventoAsync(int userId, int eventoId, RedeSocialDto[] models)
     {
-        try
-        {
-            var redeSocial = Mapper.Map<RedeSocial>(model);
+        var eventoExist = await EventoPersist.EventoExistsAsync(userId, eventoId);
+        if (!eventoExist)
+            throw new BusinessException("RedesSociais", "Evento não encontrado ou não pertence ao usuário");
 
-            if (isEvento)
+        var redesSociais = await RedeSocialPersist.GetAllByEventoIdAsync(eventoId);
+
+        foreach (var model in models)
+        {
+            if (model.Id == 0)
             {
-                redeSocial.EventoId = id;
+                model.EventoId = eventoId;
+
+                var entity = Mapper.Map<RedeSocial>(model);
+                RedeSocialPersist.Add(entity);
             }
             else
             {
-                redeSocial.PalestranteId = id;
+                var redeSocial = redesSociais.FirstOrDefault(rs => rs.Id == model.Id)
+                    ?? throw new BusinessException("RedeSocial", "Rede social não encontrada para atualização");
+                model.EventoId = eventoId;
+
+                Mapper.Map(model, redeSocial);
+                RedeSocialPersist.Update(redeSocial);
             }
-
-            RedeSocialPersist.Add<RedeSocial>(redeSocial);
-
-            await RedeSocialPersist.SaveChangesAsync();
         }
-        catch (Exception ex)
-        {
 
-            throw new Exception(ex.Message);
-        }
+        var result = await RedeSocialPersist.SaveChangesAsync();
+        if (!result) throw new BusinessException(
+            "RedeSocial",
+            "Erro ao salvar redes sociais");
+
+        Logger.LogInformation("Redes sociais salvas com sucesso para o evento {EventoId}", eventoId);
+
+        var retorno = await RedeSocialPersist.GetAllByEventoIdAsync(eventoId);
+        return Mapper.Map<RedeSocialDto[]>(retorno);
     }
 
-    public async Task<RedeSocialDto[]?> SaveByEvento(int eventoId, RedeSocialDto[] models)
+    public async Task<RedeSocialDto[]> SaveByPalestranteAsync(int userId, int palestranteId, RedeSocialDto[] models)
     {
-        try
-        {
-            var redesSociais = await RedeSocialPersist.GetAllByEventoIdAsync(eventoId);
-            if (redesSociais == null) return null;
+        var palestranteExist = await PalestrantePersist.PalestranteExistsAsync(userId, palestranteId);
+        if (!palestranteExist)
+            throw new BusinessException("RedesSociais", "Palestrante não encontrado ou não pertence ao usuário");
 
-            foreach (var model in models)
+        var redesSociais = await RedeSocialPersist.GetAllByPalestranteIdAsync(palestranteId);
+
+        foreach (var model in models)
+        {
+            if (model.Id == 0)
             {
-                if (model.Id == 0)
-                {
-                    await AddRedeSocial(eventoId, model, true);
-                }
-                else
-                {
-                    var redeSocial = redesSociais.FirstOrDefault(l => l.Id == model.Id);
-                    model.EventoId = eventoId;
+                model.PalestranteId = palestranteId;
 
-                    Mapper.Map(model, redeSocial);
-
-                    if (redeSocial != null) RedeSocialPersist.Update(redeSocial);
-
-                    await RedeSocialPersist.SaveChangesAsync();
-                }
-            }
-            var redesSociaisRetorno = await RedeSocialPersist.GetAllByEventoIdAsync(eventoId);
-            return Mapper.Map<RedeSocialDto[]>(redesSociaisRetorno);
-        }
-        catch (Exception ex)
-        {
-            throw new Exception(ex.Message);
-        }
-    }
-
-    public async Task<RedeSocialDto[]?> SaveByPalestrante(int palestranteId, RedeSocialDto[] models)
-    {
-        try
-        {
-            var redesSociais = await RedeSocialPersist.GetAllByPalestranteIdAsync(palestranteId);
-            if (redesSociais == null) return null;
-
-            foreach (var model in models)
-            {
-                if (model.Id == 0)
-                {
-                    await AddRedeSocial(palestranteId, model, false);
-                }
-                else
-                {
-                    var redeSocial = redesSociais.FirstOrDefault(l => l.Id == model.Id);
-                    model.PalestranteId = palestranteId;
-
-                    Mapper.Map(model, redeSocial);
-
-                    if (redeSocial != null) RedeSocialPersist.Update(redeSocial);
-
-                    await RedeSocialPersist.SaveChangesAsync();
-                }
-            }
-            var redesSociaisRetorno = await RedeSocialPersist.GetAllByPalestranteIdAsync(palestranteId);
-            return Mapper.Map<RedeSocialDto[]>(redesSociaisRetorno);
-        }
-        catch (Exception ex)
-        {
-            throw new Exception(ex.Message);
-        }
-    }
-
-    public async Task<bool> DeleteByEvento(int eventoId, int redeSocialId)
-    {
-        try
-        {
-            var redeSocial = await RedeSocialPersist.GetRedeSocialEventoByIdsAsync(eventoId, redeSocialId);
-            if (redeSocial == null)
-            {
-                new Exception("Rede Social para delete por evento não encontrado!");
+                var entity = Mapper.Map<RedeSocial>(model);
+                RedeSocialPersist.Add(entity);
             }
             else
             {
-                RedeSocialPersist.Delete(redeSocial);
-            }
+                var redeSocial = redesSociais.FirstOrDefault(rs => rs.Id == model.Id) ?? throw new BusinessException("RedeSocial", "Rede social não encontrada para atualização");
+                model.PalestranteId = palestranteId;
 
-            return await RedeSocialPersist.SaveChangesAsync();
+                Mapper.Map(model, redeSocial);
+                RedeSocialPersist.Update(redeSocial);
+            }
         }
-        catch (Exception ex)
-        {
-            throw new Exception(ex.Message);
-        }
+
+        var result = await RedeSocialPersist.SaveChangesAsync();
+        if (!result) throw new BusinessException(
+            "RedeSocial",
+            "Erro ao salvar redes sociais");
+
+        Logger.LogInformation("Redes sociais salvas com sucesso para o palestrante {PalestranteId}", palestranteId);
+
+        var retorno = await RedeSocialPersist.GetAllByPalestranteIdAsync(palestranteId);
+        return Mapper.Map<RedeSocialDto[]>(retorno);
     }
 
-    public async Task<bool> DeleteByPalestrante(int palestranteId, int redeSocialId)
+    public async Task<RedeSocialDto[]> GetAllByEventoIdAsync(int userId, int eventoId)
     {
-        try
-        {
-            var redeSocial = await RedeSocialPersist.GetRedeSocialPalestranteByIdsAsync(palestranteId, redeSocialId);
-            if (redeSocial == null)
-            {
-                new Exception("Rede Social para delete por palestrante não encontrado!");
-            }
-            else
-            {
-                RedeSocialPersist.Delete(redeSocial);
-            }
+        var eventoExist = await EventoPersist.EventoExistsAsync(userId, eventoId);
+        if (!eventoExist)
+            throw new BusinessException("RedesSociais", "Evento não encontrado ou não pertence ao usuário");
 
-            return await RedeSocialPersist.SaveChangesAsync();
-        }
-        catch (Exception ex)
-        {
-            throw new Exception(ex.Message);
-        }
+        var redesSociais = await RedeSocialPersist.GetAllByEventoIdAsync(eventoId);
+
+        return Mapper.Map<RedeSocialDto[]>(redesSociais);
     }
 
-    public async Task<RedeSocialDto[]?> GetAllByEventoIdAsync(int eventoId)
+    public async Task<RedeSocialDto[]> GetAllByPalestranteIdAsync(int userId, int palestranteId)
     {
-        try
-        {
-            var redesSociais = await RedeSocialPersist.GetAllByEventoIdAsync(eventoId);
-            if (redesSociais == null)
-            {
-                return null;
-            }
+        var palestranteExist = await PalestrantePersist.PalestranteExistsAsync(userId, palestranteId);
+        if (!palestranteExist)
+            throw new BusinessException("RedesSociais", "Palestrante não encontrado ou não pertence ao usuário");
 
-            var resultado = Mapper.Map<RedeSocialDto[]>(redesSociais);
+        var redesSociais = await RedeSocialPersist.GetAllByPalestranteIdAsync(palestranteId);
 
-            return resultado;
-        }
-        catch (Exception ex)
-        {
-            throw new Exception(ex.Message);
-        }
+        return Mapper.Map<RedeSocialDto[]>(redesSociais);
     }
 
-    public async Task<RedeSocialDto[]?> GetAllByPalestranteIdAsync(int palestranteId)
+    public async Task DeleteByEventoAsync(int userId, int eventoId, int redeSocialId)
     {
-        try
-        {
-            var redesSociais = await RedeSocialPersist.GetAllByPalestranteIdAsync(palestranteId);
-            if (redesSociais == null)
-            {
-                return null;
-            }
+        Logger.LogInformation(
+            "Iniciando exclusão da rede social id: {RedeSocialId} do evento id: {EventoId}",
+            redeSocialId,
+            eventoId);
 
-            var resultado = Mapper.Map<RedeSocialDto[]>(redesSociais);
+        var eventoExist = await EventoPersist.EventoExistsAsync(userId, eventoId);
+        if (!eventoExist)
+            throw new BusinessException("RedeSocial", "Evento não encontrado ou não pertence ao usuário");
 
-            return resultado;
-        }
-        catch (Exception ex)
-        {
-            throw new Exception(ex.Message);
-        }
+        var redeSocial = await RedeSocialPersist.GetRedeSocialEventoByIdsAsync(eventoId, redeSocialId);
+        if (redeSocial == null)
+            throw new BusinessException("RedeSocial", "Rede social para delete por evento não encontrada");
+
+        RedeSocialPersist.Delete(redeSocial);
+
+        var success = await RedeSocialPersist.SaveChangesAsync();
+        if (!success) throw new BusinessException("RedeSocial", "Erro ao deletar rede social");
+
+        Logger.LogInformation(
+                "Rede social id: {RedeSocialId} do evento id: {EventoId} deletada com sucesso",
+                redeSocialId,
+                eventoId);
     }
 
-    public async Task<RedeSocialDto?> GetRedeSocialEventoByIdsAsync(int eventoId, int redeSocialId)
+    public async Task DeleteByPalestranteAsync(int userId, int palestranteId, int redeSocialId)
     {
-        try
-        {
-            var redeSocial = await RedeSocialPersist.GetRedeSocialEventoByIdsAsync(eventoId, redeSocialId);
-            if (redeSocial == null)
-            {
-                return null;
-            }
+        Logger.LogInformation(
+            "Iniciando exclusão da rede social id: {RedeSocialId} do palestrante id: {PalestranteId}",
+            redeSocialId,
+            palestranteId);
 
-            var resultado = Mapper.Map<RedeSocialDto>(redeSocial);
+        var palestranteExist = await PalestrantePersist.PalestranteExistsAsync(userId, palestranteId);
+        if (!palestranteExist)
+            throw new BusinessException("RedeSocial", "Palestrante não encontrado ou não pertence ao usuário");
 
-            return resultado;
-        }
-        catch (Exception ex)
-        {
-            throw new Exception(ex.Message);
-        }
-    }
+        var redeSocial = await RedeSocialPersist.GetRedeSocialPalestranteByIdsAsync(palestranteId, redeSocialId);
+        if (redeSocial == null)
+            throw new BusinessException("RedeSocial", "Rede social para delete por palestrante não encontrada");
 
-    public async Task<RedeSocialDto?> GetRedeSocialPalestranteByIdsAsync(int palestranteId, int redeSocialId)
-    {
-        try
-        {
-            var redeSocial = await RedeSocialPersist.GetRedeSocialPalestranteByIdsAsync(palestranteId, redeSocialId);
-            if (redeSocial == null)
-            {
-                return null;
-            }
+        RedeSocialPersist.Delete(redeSocial);
 
-            var resultado = Mapper.Map<RedeSocialDto>(redeSocial);
+        var success = await RedeSocialPersist.SaveChangesAsync();
+        if (!success) throw new BusinessException("RedeSocial", "Erro ao deletar rede social");
 
-            return resultado;
-        }
-        catch (Exception ex)
-        {
-            throw new Exception(ex.Message);
-        }
+        Logger.LogInformation(
+                "Rede social id: {RedeSocialId} do palestrante id: {PalestranteId} deletada com sucesso",
+                redeSocialId,
+                palestranteId);
     }
 }

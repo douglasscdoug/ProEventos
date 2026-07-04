@@ -7,4 +7,5 @@ public interface IPalestrantePersist : IGeralPersist
 {
    IQueryable<Palestrante> Query();
    Task<Palestrante?> GetPalestranteByUserIdAsync(int userId, bool includeEventos = false);
+   Task<bool> PalestranteExistsAsync(int userId, int palestranteId);
 }

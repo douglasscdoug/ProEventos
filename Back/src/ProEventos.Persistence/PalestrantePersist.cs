@@ -30,4 +30,9 @@ public class PalestrantePersist(ProEventosContext _context) : GeralPersist(_cont
 
       return await query.FirstOrDefaultAsync();
    }
+
+    public async Task<bool> PalestranteExistsAsync(int userId, int palestranteId)
+    {
+        return await Context.Palestrantes.AnyAsync(p => p.UserId == userId && p.Id == palestranteId);
+    }
 }

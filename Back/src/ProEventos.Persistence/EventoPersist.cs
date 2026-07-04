@@ -10,7 +10,12 @@ public class EventoPersist(ProEventosContext _context) : IEventoPersist
 {
    public ProEventosContext Context { get; } = _context;
 
-   public async Task<Evento?> GetEventoByIdAsync(int userId, int eventoId, bool includePalestrantes)
+    public async Task<bool> EventoExistsAsync(int userId, int eventoId)
+    {
+        return await Context.Eventos.AnyAsync(e => e.Id == eventoId && e.UserId == userId);
+    }
+
+    public async Task<Evento?> GetEventoByIdAsync(int userId, int eventoId, bool includePalestrantes)
    {
       IQueryable<Evento> query = Context.Eventos
           .Include(e => e.Lotes)

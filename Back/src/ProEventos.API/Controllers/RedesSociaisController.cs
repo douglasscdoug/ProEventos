@@ -20,133 +20,50 @@ namespace ProEventos.API.Controllers
         public IEventoService EventoService { get; } = _eventoService;
         public IPalestranteService PalestranteService { get; } = _palestranteService;
 
+        [HttpPut("Evento/{eventoId}")]
+        public async Task<IActionResult> SaveByEvento(int eventoId, [FromBody] RedeSocialDto[] models)
+        {
+            var result = await RedeSocialService.SaveByEventoAsync(User.GetUserId(), eventoId, models);
+            return Ok(result);
+        }
+
+        [HttpPut("Palestrante/{palestranteId}")]
+        public async Task<IActionResult> SaveByPalestrante(int palestranteId, [FromBody] RedeSocialDto[] models)
+        {
+            var result = await RedeSocialService.SaveByPalestranteAsync(User.GetUserId(), palestranteId, models);
+            return Ok(result);
+        }
+
         [HttpGet("Evento/{eventoId}")]
         public async Task<IActionResult> GetByEvento(int eventoId)
         {
-            try
-            {
-                if(! await AutorEvento(eventoId)) return Unauthorized();
+            var result = await RedeSocialService.GetAllByEventoIdAsync(User.GetUserId(), eventoId);
+            if (result.Length == 0) return NoContent();
 
-                var redesSocias = await RedeSocialService.GetAllByEventoIdAsync(eventoId);
-                if (redesSocias == null) return NoContent();
-
-                return Ok(redesSocias);
-            }
-            catch (Exception ex)
-            {
-                return this.StatusCode(StatusCodes.Status500InternalServerError,
-                    $"Erro ao tentar recuperar redes socias. Erro: {ex.Message}");
-            }
+            return Ok(result);
         }
 
-        [HttpGet("Palestrante")]
-        public async Task<IActionResult> GetByPalestrante()
+        [HttpGet("Palestrante/{palestranteId}")]
+        public async Task<IActionResult> GetByPalestrante(int palestranteId)
         {
-            try
-            {
-                var palestrante = await PalestranteService.GetPalestranteByUserIdAsync(User.GetUserId());
-                if(palestrante == null) return Unauthorized();
+            var result = await RedeSocialService.GetAllByPalestranteIdAsync(User.GetUserId(), palestranteId);
+            if (result.Length == 0) return NoContent();
 
-                var redesSocias = await RedeSocialService.GetAllByPalestranteIdAsync(palestrante.Id);
-                if (redesSocias == null) return NoContent();
-
-                return Ok(redesSocias);
-            }
-            catch (Exception ex)
-            {
-                return this.StatusCode(StatusCodes.Status500InternalServerError,
-                    $"Erro ao tentar recuperar redes socias. Erro: {ex.Message}");
-            }
-        }
-
-        [HttpPut("Evento/{eventoId}")]
-        public async Task<IActionResult> SaveByEvento(int eventoId, RedeSocialDto[] models)
-        {
-            try
-            {
-                if(! await AutorEvento(eventoId)) return Unauthorized();
-                var redesSociais = await RedeSocialService.SaveByEvento(eventoId, models);
-                if (redesSociais == null) return NoContent();
-
-                return Ok(redesSociais);
-            }
-            catch (Exception ex)
-            {
-                return this.StatusCode(StatusCodes.Status500InternalServerError,
-                    $"Erro ao tentar salvar redes sociais. Erro: {ex.Message}");
-            }
-        }
-
-        [HttpPut("Palestrante")]
-        public async Task<IActionResult> SaveByPalestrante(RedeSocialDto[] models)
-        {
-            try
-            {
-                var palestrante = await PalestranteService.GetPalestranteByUserIdAsync(User.GetUserId());
-                if(palestrante == null) return Unauthorized();
-
-                var redesSociais = await RedeSocialService.SaveByPalestrante(palestrante.Id, models);
-                if (redesSociais == null) return NoContent();
-
-                return Ok(redesSociais);
-            }
-            catch (Exception ex)
-            {
-                return this.StatusCode(StatusCodes.Status500InternalServerError,
-                    $"Erro ao tentar salvar redes sociais. Erro: {ex.Message}");
-            }
+            return Ok(result);
         }
 
         [HttpDelete("Evento/{eventoId}/{redeSocialId}")]
         public async Task<IActionResult> DeleteByEvento(int eventoId, int redeSocialId)
         {
-            try
-            {
-                if(! await AutorEvento(eventoId)) return Unauthorized();
-                var redeSocial = await RedeSocialService.GetRedeSocialEventoByIdsAsync(eventoId, redeSocialId);
-                if (redeSocial == null) return NoContent();
-
-                return await RedeSocialService.DeleteByEvento(eventoId, redeSocialId)
-                    ? Ok(new { message = "Deletado" })
-                    : throw new Exception("Ocorreu um erro ao tentar deletar a rede social.");
-            }
-            catch (Exception ex)
-            {
-                return this.StatusCode(StatusCodes.Status500InternalServerError,
-                    $"Erro ao tentar deletar rede social. Erro: {ex.Message}");
-            }
+            await RedeSocialService.DeleteByEventoAsync(User.GetUserId(), eventoId, redeSocialId);
+            return NoContent();
         }
 
-        [HttpDelete("Palestrante/{redeSocialId}")]
-        public async Task<IActionResult> DeleteByPalestrante(int redeSocialId)
+        [HttpDelete("Palestrante/{palestranteId}/{redeSocialId}")]
+        public async Task<IActionResult> DeleteByPalestrante(int palestranteId, int redeSocialId)
         {
-            try
-            {
-                var palestrante = await PalestranteService.GetPalestranteByUserIdAsync(User.GetUserId());
-                if(palestrante == null) return Unauthorized();
-
-                var redeSocial = await RedeSocialService.GetRedeSocialPalestranteByIdsAsync(palestrante.Id, redeSocialId);
-                if (redeSocial == null) return NoContent();
-
-                return await RedeSocialService.DeleteByPalestrante(palestrante.Id, redeSocialId)
-                    ? Ok(new { message = "Deletado" })
-                    : throw new Exception("Ocorreu um erro ao tentar deletar a rede social.");
-            }
-            catch (Exception ex)
-            {
-                return this.StatusCode(StatusCodes.Status500InternalServerError,
-                    $"Erro ao tentar deletar rede social. Erro: {ex.Message}");
-            }
-        }
-
-        [NonAction]
-        private async Task<bool> AutorEvento(int eventoId)
-        {
-            var evento = await EventoService.GetEventoByIdAsync(User.GetUserId(), eventoId, false);
-
-            if(evento == null) return false;
-
-            return true;
+            await RedeSocialService.DeleteByPalestranteAsync(User.GetUserId(), palestranteId, redeSocialId);
+            return NoContent();
         }
     }
 }

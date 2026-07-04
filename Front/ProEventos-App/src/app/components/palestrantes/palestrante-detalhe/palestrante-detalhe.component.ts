@@ -5,7 +5,7 @@ import { Palestrante } from '@app/models/Palestrante';
 import { PalestranteService } from '@app/services/palestrante.service';
 import { NgxSpinnerService } from 'ngx-spinner';
 import { ToastrService } from 'ngx-toastr';
-import { debounceTime, map, tap } from 'rxjs';
+import { debounceTime, finalize, map, tap } from 'rxjs';
 
 @Component({
   selector: 'app-palestrante-detalhe',
@@ -37,7 +37,7 @@ export class PalestranteDetalheComponent implements OnInit {
 
   private carregarPalestrante(): void {
     this.spinner.show();
-    this.palestranteService.getPalestrante().subscribe({
+    this.palestranteService.getPalestrante().pipe(finalize(() => this.spinner.hide())).subscribe({
       next: (palestrante: Palestrante) => {
         this.form.patchValue(palestrante);
       },
