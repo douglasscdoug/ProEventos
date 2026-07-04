@@ -9,8 +9,9 @@ public interface IPalestranteService
 {
     Task<PalestranteDto?> AddPalestrante(int userId, PalestranteAddDto model);
     Task<PalestranteDto?> UpdatePalestrante(int userId, PalestranteUpdateDto model);
-    Task<PalestranteDto?> GetPalestranteByUserIdAsync(int userId, bool includeEventos = false);
+    
     //refatorados
     // Task<PageList<PalestranteDto>?> GetAllPalestrantesAsync(PageParams pageParams, bool includeEventos = false);
     Task<PagedResult<PalestranteDto>> FiltrarAsync(PalestranteFiltroDto filtro);
+    Task<PalestranteDto?> GetPalestranteByUserIdAsync(int userId, bool includeEventos = false);
 }

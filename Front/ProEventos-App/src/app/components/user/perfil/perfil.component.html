@@ -63,7 +63,7 @@
               <i class="fa fa-share-square me-2"></i><span>Redes Sociais</span>
             </ng-template>
             <h3 class="border-bottom">Redes Sociais</h3>
-            <app-redes-sociais></app-redes-sociais>
+            <app-redes-sociais *ngIf="palestranteId" [palestranteId]="this.palestranteId"></app-redes-sociais>
           </tab>
         </tabset>
       </div>

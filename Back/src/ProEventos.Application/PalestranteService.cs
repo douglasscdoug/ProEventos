@@ -18,27 +18,9 @@ public class PalestranteService(
 {
    public IMapper Mapper { get; } = _mapper;
    public IPalestrantePersist PalestrantePersist { get; } = _palestrantePersist;
-    public ILogger<PalestranteService> Logger { get; } = _logger;
+   public ILogger<PalestranteService> Logger { get; } = _logger;
 
-    // public async Task<PageList<PalestranteDto>?> GetAllPalestrantesAsync(PageParams pageParams, bool includeEventos = false)
-    // {
-    //    var palestrantes = await PalestrantePersist.GetAllPalestrantesAsync(pageParams, includeEventos);
-    //    if (palestrantes == null)
-    //    {
-    //       return null;
-    //    }
-
-    //    var resultado = Mapper.Map<PageList<PalestranteDto>>(palestrantes);
-
-    //    resultado.CurrentPage = palestrantes.CurrentPage;
-    //    resultado.TotalPages = palestrantes.TotalPages;
-    //    resultado.PageSize = palestrantes.PageSize;
-    //    resultado.TotalCount = palestrantes.TotalCount;
-
-    //    return resultado;
-    // }
-
-    public async Task<PagedResult<PalestranteDto>> FiltrarAsync(PalestranteFiltroDto filtro)
+   public async Task<PagedResult<PalestranteDto>> FiltrarAsync(PalestranteFiltroDto filtro)
    {
       Logger.LogInformation(
          "Iniciando filtro de palestrantes. Page={Page}, PageSize={PageSize}, Serch={Search}",
@@ -61,7 +43,7 @@ public class PalestranteService(
       }
 
       //Busca por nome
-      if(!string.IsNullOrWhiteSpace(filtro.Nome))
+      if (!string.IsNullOrWhiteSpace(filtro.Nome))
       {
          var termo = filtro.Nome.ToLower();
 
@@ -69,7 +51,7 @@ public class PalestranteService(
       }
 
       //Busca por sobrenome
-      if(!string.IsNullOrWhiteSpace(filtro.Sobrenome))
+      if (!string.IsNullOrWhiteSpace(filtro.Sobrenome))
       {
          var termo = filtro.Sobrenome.ToLower();
 
@@ -77,7 +59,7 @@ public class PalestranteService(
       }
 
       //Busca por E-mail
-      if(!string.IsNullOrWhiteSpace(filtro.Email))
+      if (!string.IsNullOrWhiteSpace(filtro.Email))
       {
          var termo = filtro.Email.ToLower();
 
@@ -108,6 +90,19 @@ public class PalestranteService(
          Page = filtro.Page,
          PageSize = filtro.PageSize
       };
+   }
+
+   public async Task<PalestranteDto?> GetPalestranteByUserIdAsync(int userId, bool includeEventos = false)
+   {
+      var palestrante = await PalestrantePersist.GetPalestranteByUserIdAsync(userId, includeEventos);
+      if (palestrante == null)
+      {
+         return null;
+      }
+
+      var resultado = Mapper.Map<PalestranteDto>(palestrante);
+
+      return resultado;
    }
 
    public async Task<PalestranteDto?> AddPalestrante(int userId, PalestranteAddDto model)
@@ -159,27 +154,6 @@ public class PalestranteService(
          throw new Exception(ex.Message);
       }
    }
-
-   public async Task<PalestranteDto?> GetPalestranteByUserIdAsync(int userId, bool includeEventos = false)
-   {
-      try
-      {
-         var palestrante = await PalestrantePersist.GetPalestranteByUserIdAsync(userId, includeEventos);
-         if (palestrante == null)
-         {
-            return null;
-         }
-
-         var resultado = Mapper.Map<PalestranteDto>(palestrante);
-
-         return resultado;
-      }
-      catch (Exception ex)
-      {
-         throw new Exception(ex.Message);
-      }
-   }
-
 
    private IQueryable<Palestrante> ApplyOrdering(IQueryable<Palestrante> query, PagedRequest filtro)
    {

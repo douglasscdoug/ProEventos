@@ -11,6 +11,7 @@ import { AccountService } from '@app/services/account.service';
 import { environment } from 'src/environments/environment';
 import { PalestranteDetalheComponent } from "../../palestrantes/palestrante-detalhe/palestrante-detalhe.component";
 import { RedesSociaisComponent } from "../../redes-sociais/redes-sociais.component";
+import { PalestranteService } from '@app/services/palestrante.service';
 
 @Component({
   selector: 'app-perfil',
@@ -22,6 +23,7 @@ export class PerfilComponent implements OnInit {
   public usuario = {} as UserUpdate;
   public imagemURL = '';
   public file!: File;
+  palestranteId!: number;
 
   public get ehPalestrante(): boolean {
     return this.usuario.funcao === 'Palestrante';
@@ -30,10 +32,17 @@ export class PerfilComponent implements OnInit {
   constructor(
     private spinner: NgxSpinnerService,
     private toastr: ToastrService,
-    private accountService: AccountService
+    private accountService: AccountService,
+    private palestranteService: PalestranteService
   ) {}
 
-  ngOnInit() {}
+  ngOnInit() {
+      this.palestranteService.getPalestrante().subscribe({
+        next: (palestrante) => {
+        if(palestrante.id) this.palestranteId = palestrante.id;
+        }
+      })
+  }
 
   public setFormValue(usuario: UserUpdate): void {
     this.usuario = usuario;

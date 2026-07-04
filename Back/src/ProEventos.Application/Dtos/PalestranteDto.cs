@@ -9,5 +9,4 @@ public class PalestranteDto
    public int UserId { get; set; }
    public UserUpdateDto ? User { get; set; }
    public IEnumerable<RedeSocialDto> ? RedesSociais { get; set; }
-   public IEnumerable<EventoDto> ? Eventos { get; set; }
 }
