@@ -24,6 +24,7 @@ export class PerfilComponent implements OnInit {
   public imagemURL = '';
   public file!: File;
   palestranteId!: number;
+  palestranteCadastrado = false;
 
   public get ehPalestrante(): boolean {
     return this.usuario.funcao === 'Palestrante';
@@ -37,11 +38,7 @@ export class PerfilComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-      this.palestranteService.getPalestrante().subscribe({
-        next: (palestrante) => {
-        if(palestrante.id) this.palestranteId = palestrante.id;
-        }
-      })
+      this.carregarPalestrante();
   }
 
   public setFormValue(usuario: UserUpdate): void {
@@ -76,5 +73,16 @@ export class PerfilComponent implements OnInit {
         console.error(error);
       }
     ).add(() => this.spinner.hide());
+  }
+
+  public carregarPalestrante(): void {
+    this.palestranteService.getPalestrante().subscribe({
+        next: (palestrante) => {
+        if(palestrante.id) {
+          this.palestranteId = palestrante.id;
+          this.palestranteCadastrado = true;
+        }
+        }
+      })
   }
 }

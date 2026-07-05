@@ -8,6 +8,7 @@ import { AccountService } from '@app/services/account.service';
 import { PalestranteService } from '@app/services/palestrante.service';
 import { NgxSpinnerService } from 'ngx-spinner';
 import { ToastrService } from 'ngx-toastr';
+import { finalize } from 'rxjs';
 
 @Component({
   selector: 'app-perfil-detalhe',
@@ -20,6 +21,7 @@ export class PerfilDetalheComponent implements OnInit {
   perfilForm: FormGroup;
 
   @Output() changeFormValue = new EventEmitter();
+  @Output() perfilAtualizado = new EventEmitter<void>();
 
   constructor(
     private fb: FormBuilder,
@@ -42,7 +44,7 @@ export class PerfilDetalheComponent implements OnInit {
       email: ['', [Validators.required, Validators.email]],
       phoneNumber: ['', Validators.required],
       funcao: ['NaoInformado', Validators.required],
-      descricao: [''],
+      descricao: ['', Validators.required],
       password: ['', [Validators.required, Validators.minLength(6)]],
       confirmaPassword: ['', Validators.required]
     }, formOptions);
@@ -90,17 +92,23 @@ export class PerfilDetalheComponent implements OnInit {
     this.spinner.show();
 
     if(this.f.funcao.value == 'Palestrante') {
-      this.palestranteService.post().subscribe(
-        () => this.toaster.success('Função palestrante ativada!', 'Sucesso!'),
-        (error: any) => {
+      this.palestranteService.post().subscribe({
+        next: () => {
+          this.toaster.success('Função palestrante ativada!', 'Sucesso!');
+          this.perfilAtualizado.emit();
+        },
+        error: (error: any) => {
           this.toaster.error('A função palestrante não pode ser ativada, tente novamente mais tarde.', 'Erro!');
           console.error(error);
         }
-      )
+      })
     }
 
     this.accountService.updateUser(userUpdate).subscribe({
-      next: () => { this.toaster.success('Usuário atualizado', 'Sucesso')},
+      next: () => { 
+        this.toaster.success('Usuário atualizado', 'Sucesso');
+        this.carregarUsuario();
+      },
       error: (error: any) => {
         this.toaster.error(error.error);
         console.error(error);

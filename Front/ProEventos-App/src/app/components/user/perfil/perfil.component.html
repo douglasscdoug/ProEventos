@@ -49,16 +49,18 @@
               <i class="fa fa-address-card me-2"></i><span>Perfil</span>
             </ng-template>
             <h3 class="border-bottom">Detalhe Perfil</h3>
-            <app-perfil-detalhe (changeFormValue)="setFormValue($event)"></app-perfil-detalhe>
+            <app-perfil-detalhe 
+              (changeFormValue)="setFormValue($event)"
+              (perfilAtualizado)="carregarPalestrante()"></app-perfil-detalhe>
           </tab>
-          <tab *ngIf="ehPalestrante" class="border border-top-0 p-3">
+          <tab *ngIf="palestranteCadastrado" class="border border-top-0 p-3">
             <ng-template tabHeading>
               <i class="fa fa-user me-2"></i><span>Palestrante</span>
             </ng-template>
             <h3 class="border-bottom">Palestrante</h3>
             <app-palestrante-detalhe></app-palestrante-detalhe>
           </tab>
-          <tab *ngIf="ehPalestrante" class="border border-top-0 p-3">
+          <tab *ngIf="palestranteCadastrado" class="border border-top-0 p-3">
             <ng-template tabHeading>
               <i class="fa fa-share-square me-2"></i><span>Redes Sociais</span>
             </ng-template>
