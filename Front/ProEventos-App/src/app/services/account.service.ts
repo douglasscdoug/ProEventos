@@ -88,6 +88,22 @@ export class AccountService {
     return localStorage.getItem('refreshToken');
   }
 
+  public checkAuthentication(): boolean {
+    const user = localStorage.getItem('user');
+    if (!user) {
+      return false;
+    }
+
+    try {
+      const userParsed = JSON.parse(user);
+
+      return !!userParsed.token;
+    } catch {
+      localStorage.removeItem('user');
+      return false;
+    }
+  }
+
   public setCurrentUser(user: User): void {
     localStorage.setItem('user', JSON.stringify(user));
     this.currentUserSource.next(user);
