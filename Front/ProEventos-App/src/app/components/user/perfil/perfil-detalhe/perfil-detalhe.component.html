@@ -68,12 +68,14 @@
       <input
         type="text"
         class="form-control"
+        mask="(00) 00000-0000||(00) 0000-0000"
         [ngClass]="{
           'is-invalid': f.phoneNumber.errors && f.phoneNumber.touched
         }"
         formControlName="phoneNumber"
       />
-      <div class="invalid-feedback">Obrigatório</div>
+      <div class="invalid-feedback" *ngIf="f.phoneNumber.errors?.required">Obrigatório</div>
+      <div class="invalid-feedback" *ngIf="f.phoneNumber.invalid">Telefone inválido</div>
     </div>
     <div class="form-group col-sm">
       <label>Função</label>
@@ -117,9 +119,6 @@
         }"
         formControlName="password"
       />
-      <div class="invalid-feedback" *ngIf="f.password.errors?.required">
-        Obrigatório
-      </div>
       <div class="invalid-feedback" *ngIf="f.password.errors?.minlength">
         Deve ter no mínimo 6 caracteres
       </div>
@@ -134,15 +133,12 @@
         }"
         formControlName="confirmaPassword"
       />
-      <div class="invalid-feedback" *ngIf="f.confirmaPassword.errors?.required">
-        Obrigatório
-      </div>
-      <div
-        class="invalid-feedback"
-        *ngIf="f.confirmaPassword.errors?.mustMatch"
-      >
-        As senhas devem ser iguais
-      </div>
+      @if (perfilForm.hasError('mustMatch') &&
+    perfilForm.get('confirmaPassword')?.touched) {
+  <div class="invalid-feedback d-block">
+    As senhas não coincidem.
+  </div>
+}
     </div>
   </div>
   <div class="card-footer mt-3">
@@ -153,7 +149,7 @@
       >
         Cancelar Alteração
       </button>
-      <button class="btn btn-success" type="submit">
+      <button class="btn btn-success" type="submit" [disabled]="perfilForm.invalid">
         <!-- <span class="spinner-border spinner-border-sm me-1"></span> -->
         Salvar Alteração
       </button>

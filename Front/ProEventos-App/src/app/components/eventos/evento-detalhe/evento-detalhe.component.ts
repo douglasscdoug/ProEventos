@@ -21,12 +21,14 @@ import { DateTimeFormatPipe } from "../../../helpers/DateTimeFormat.pipe";
 import { RedesSociaisComponent } from "../../redes-sociais/redes-sociais.component";
 import { PalestranteService } from '@app/services/palestrante.service';
 import { Palestrante } from '@app/models/Palestrante';
+import { NgxMaskDirective } from 'ngx-mask';
+import { phoneValidator } from '@app/helpers/Phone.Validator';
 defineLocale('pt-br', ptBrLocale);
 
 @Component({
   selector: 'app-evento-detalhe',
   templateUrl: './evento-detalhe.component.html',
-  imports: [ReactiveFormsModule, CommonModule, BsDatepickerModule, NgxCurrencyDirective, DateTimeFormatPipe, RedesSociaisComponent],
+  imports: [ReactiveFormsModule, CommonModule, BsDatepickerModule, NgxCurrencyDirective, DateTimeFormatPipe, RedesSociaisComponent, NgxMaskDirective],
   styleUrls: ['./evento-detalhe.component.scss']
 })
 export class EventoDetalheComponent implements OnInit {
@@ -92,7 +94,7 @@ export class EventoDetalheComponent implements OnInit {
       local: ['', Validators.required],
       dataEvento: ['', Validators.required],
       qtdPessoas: ['', [Validators.required, Validators.max(120000)]],
-      telefone: ['', Validators.required],
+      telefone: ['', [Validators.required, phoneValidator]],
       email: ['', [Validators.required, Validators.email]],
       imagemUrl: [''],
       lotes: this.fb.array([])
@@ -290,9 +292,9 @@ export class EventoDetalheComponent implements OnInit {
   }
 
   public adicionarPalestrante(): void {
-    this.palestranteService.getPalestrantes().subscribe({
-      next: (palestrantesResponse) => {
-        this.palestrantesDiponiveis = palestrantesResponse.result ?? [];
+    this.palestranteService.filtrar('').subscribe({
+      next: (response) => {
+        this.palestrantesDiponiveis = response.data ?? [];
         this.abrirModalPalestrantes();
       },
       error: (erro: any) => this.toastr.error('Erro ao carregar palestrantes', 'Erro!')

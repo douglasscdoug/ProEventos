@@ -2,17 +2,19 @@ import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, OnInit, Output } from '@angular/core';
 import { AbstractControlOptions, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { phoneValidator } from '@app/helpers/Phone.Validator';
 import { ValidatorField } from '@app/helpers/ValidatorField';
 import { UserUpdate } from '@app/models/identity/UserUpdate';
 import { AccountService } from '@app/services/account.service';
 import { PalestranteService } from '@app/services/palestrante.service';
+import { NgxMaskDirective } from 'ngx-mask';
 import { NgxSpinnerService } from 'ngx-spinner';
 import { ToastrService } from 'ngx-toastr';
 import { finalize } from 'rxjs';
 
 @Component({
   selector: 'app-perfil-detalhe',
-  imports: [ReactiveFormsModule, CommonModule],
+  imports: [ReactiveFormsModule, CommonModule, NgxMaskDirective],
   templateUrl: './perfil-detalhe.component.html',
   styleUrl: './perfil-detalhe.component.scss'
 })
@@ -42,11 +44,11 @@ export class PerfilDetalheComponent implements OnInit {
       nome: ['', Validators.required],
       sobrenome: ['', Validators.required],
       email: ['', [Validators.required, Validators.email]],
-      phoneNumber: ['', Validators.required],
+      phoneNumber: ['', [Validators.required, phoneValidator]],
       funcao: ['NaoInformado', Validators.required],
       descricao: ['', Validators.required],
-      password: ['', [Validators.required, Validators.minLength(6)]],
-      confirmaPassword: ['', Validators.required]
+      password: ['',  Validators.minLength(6)],
+      confirmaPassword: ['']
     }, formOptions);
   }
 
