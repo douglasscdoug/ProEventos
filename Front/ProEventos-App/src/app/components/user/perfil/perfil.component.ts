@@ -35,15 +35,15 @@ export class PerfilComponent implements OnInit {
     private toastr: ToastrService,
     private accountService: AccountService,
     private palestranteService: PalestranteService
-  ) {}
+  ) { }
 
   ngOnInit() {
-      this.carregarPalestrante();
+    this.carregarPalestrante();
   }
 
   public setFormValue(usuario: UserUpdate): void {
     this.usuario = usuario;
-    if(usuario.imagemUrl)
+    if (usuario.imagemUrl)
       this.imagemURL = this.usuario.imagemUrl!;
     else
       this.imagemURL = './assets/images/perfil.png';
@@ -77,12 +77,16 @@ export class PerfilComponent implements OnInit {
 
   public carregarPalestrante(): void {
     this.palestranteService.getPalestrante().subscribe({
-        next: (palestrante) => {
-        if(palestrante.id) {
+      next: (palestrante) => {
+        if (palestrante.id) {
           this.palestranteId = palestrante.id;
-          this.palestranteCadastrado = true;
+          this.palestranteCadastrado = !!palestrante.ativo;
         }
-        }
-      })
+      },
+      error: () => {
+        this.palestranteId = 0;
+        this.palestranteCadastrado = false;
+      }
+    })
   }
 }

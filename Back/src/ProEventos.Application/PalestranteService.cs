@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 using ProEventos.Application.Common.Utils;
 using ProEventos.Application.Contratos;
 using ProEventos.Application.Dtos;
+using ProEventos.Application.Exceptions;
 using ProEventos.Application.Filters;
 using ProEventos.Domain;
 using ProEventos.Persistence.Contratos;
@@ -94,65 +95,89 @@ public class PalestranteService(
 
    public async Task<PalestranteDto?> GetPalestranteByUserIdAsync(int userId, bool includeEventos = false)
    {
+      Logger.LogInformation(
+         "Iniciando busca de palestrante por UserId. UserId={UserId}, IncludeEventos={IncludeEventos}",
+         userId,
+         includeEventos
+      );
+
       var palestrante = await PalestrantePersist.GetPalestranteByUserIdAsync(userId, includeEventos);
       if (palestrante == null)
       {
+         Logger.LogWarning(
+            "Palestrante não encontrado para UserId={UserId}",
+            userId
+         );
          return null;
       }
 
       var resultado = Mapper.Map<PalestranteDto>(palestrante);
+      Logger.LogInformation(
+         "Busca de palestrante por UserId finalizada. UserId={UserId}, PalestranteId={PalestranteId}",
+         userId,
+         resultado.Id
+      );
 
       return resultado;
    }
 
-   public async Task<PalestranteDto?> AddPalestrante(int userId, PalestranteAddDto model)
+   public async Task<PalestranteDto> AddPalestrante(int userId, PalestranteAddDto model)
    {
-      try
-      {
-         var palestrante = Mapper.Map<Palestrante>(model);
-         palestrante.UserId = userId;
+      Logger.LogInformation(
+         "Iniciando adição de palestrante. UserId={UserId}",
+         userId
+      );
+      var palestrante = Mapper.Map<Palestrante>(model);
+      palestrante.UserId = userId;
+      palestrante.Ativo = true;
 
-         PalestrantePersist.Add(palestrante);
+      PalestrantePersist.Add(palestrante);
 
-         if (await PalestrantePersist.SaveChangesAsync())
-         {
-            var PalestranteRetorno = await PalestrantePersist.GetPalestranteByUserIdAsync(palestrante.UserId, false);
-            return Mapper.Map<PalestranteDto>(PalestranteRetorno);
-         }
+      var sucess = await PalestrantePersist.SaveChangesAsync();
+      if (!sucess) throw new BusinessException("Erro", "Erro ao salvar palestrante");
 
-         return null;
-      }
-      catch (Exception ex)
-      {
-         throw new Exception(ex.Message);
-      }
+      var PalestranteRetorno = await PalestrantePersist.GetPalestranteByUserIdAsync(palestrante.UserId, false);
+
+      return Mapper.Map<PalestranteDto>(PalestranteRetorno);
    }
 
    public async Task<PalestranteDto?> UpdatePalestrante(int userId, PalestranteUpdateDto model)
    {
-      try
+      Logger.LogInformation(
+         "Iniciando atualização de palestrante. UserId={UserId}, PalestranteId={PalestranteId}",
+         userId,
+         model.Id
+      );
+
+      var palestrante = await PalestrantePersist.GetPalestranteByUserIdAsync(userId, false);
+      if (palestrante == null)
       {
-         var palestrante = await PalestrantePersist.GetPalestranteByUserIdAsync(userId, false);
-         if (palestrante == null) return null;
-
-         model.Id = palestrante.Id;
-         model.UserId = userId;
-
-         Mapper.Map(model, palestrante);
-
-         PalestrantePersist.Update(palestrante);
-
-         if (await PalestrantePersist.SaveChangesAsync())
-         {
-            var palestranteRetorno = await PalestrantePersist.GetPalestranteByUserIdAsync(userId, false);
-            return Mapper.Map<PalestranteDto>(palestranteRetorno);
-         }
+         Logger.LogWarning(
+            "Tentativa de atualização de palestrante inexistente. UserId={UserId}, PalestranteId={PalestranteId}",
+            userId,
+            model.Id
+         );
          return null;
       }
-      catch (Exception ex)
-      {
-         throw new Exception(ex.Message);
-      }
+
+      model.Id = palestrante.Id;
+      model.UserId = userId;
+
+      Mapper.Map(model, palestrante);
+
+      PalestrantePersist.Update(palestrante);
+
+      var sucess = await PalestrantePersist.SaveChangesAsync();
+
+      if(!sucess) throw new BusinessException("Erro", "Erro ao salvar palestrante");
+
+      var palestranteRetorno = await PalestrantePersist.GetPalestranteByUserIdAsync(userId, false);
+      Logger.LogInformation(
+         "Atualização de palestrante finalizada. UserId={UserId}, PalestranteId={PalestranteId}",
+         userId,
+         palestranteRetorno?.Id
+      );
+      return Mapper.Map<PalestranteDto>(palestranteRetorno);
    }
 
    private IQueryable<Palestrante> ApplyOrdering(IQueryable<Palestrante> query, PagedRequest filtro)

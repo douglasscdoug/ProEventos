@@ -7,7 +7,7 @@ namespace ProEventos.Application.Contratos;
 
 public interface IPalestranteService
 {
-    Task<PalestranteDto?> AddPalestrante(int userId, PalestranteAddDto model);
+    Task<PalestranteDto> AddPalestrante(int userId, PalestranteAddDto model);
     Task<PalestranteDto?> UpdatePalestrante(int userId, PalestranteUpdateDto model);
     
     //refatorados

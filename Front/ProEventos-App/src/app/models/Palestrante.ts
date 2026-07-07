@@ -5,6 +5,7 @@ import { RedeSocial } from "./RedeSocial";
 export interface Palestrante {
    id: number;
    miniCurriculo: string;
+   ativo: boolean;
    user: UserUpdate;
    redesSociais: RedeSocial[];
    palestrantesEventos: Evento[];
