@@ -10,6 +10,7 @@ import { errorInterceptor } from './interceptors/error.interceptor';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { provideToastr } from 'ngx-toastr';
 import { ModalModule } from 'ngx-bootstrap/modal';
+import { provideNgxMask } from 'ngx-mask';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -24,6 +25,7 @@ export const appConfig: ApplicationConfig = {
         progressBar: true
       }
     ),
+    provideNgxMask(),
     provideHttpClient(withInterceptors([errorInterceptor, authInterceptor])),
     importProvidersFrom(ModalModule.forRoot())
   ]
