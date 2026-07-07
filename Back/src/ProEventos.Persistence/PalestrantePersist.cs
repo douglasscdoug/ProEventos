@@ -33,9 +33,14 @@ public class PalestrantePersist(ProEventosContext _context) : GeralPersist(_cont
       return await query.FirstOrDefaultAsync();
    }
 
-    public async Task<bool> PalestranteExistsAsync(int userId, int palestranteId)
-    {
-        return await Context.Palestrantes
-        .AnyAsync(p => p.UserId == userId && p.Id == palestranteId && p.Ativo);
-    }
+   public async Task<bool> PalestranteExistsAsync(int userId, int palestranteId)
+   {
+      return await Context.Palestrantes
+      .AnyAsync(p => p.UserId == userId && p.Id == palestranteId && p.Ativo);
+   }
+
+   public async Task<Palestrante?> GetPalestranteStatusByUserIdAsync(int userId)
+   {
+      return await Context.Palestrantes.FirstOrDefaultAsync(p => p.UserId == userId);
+   }
 }

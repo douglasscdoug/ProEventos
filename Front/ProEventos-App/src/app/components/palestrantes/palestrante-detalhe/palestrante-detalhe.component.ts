@@ -76,7 +76,8 @@ export class PalestranteDetalheComponent implements OnInit {
 
   public validation(): void {
     this.form = this.fb.group({
-      miniCurriculo: ['']
+      miniCurriculo: [''],
+      ativo: [true]
     })
   }
 }

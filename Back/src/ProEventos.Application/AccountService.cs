@@ -21,7 +21,8 @@ public class AccountService(
    ITokenService _tokenService,
    IRefreshTokenPersist _refreshTokenPersist,
    IGeralPersist _geralPersist,
-   IPhotoService _photoService
+   IPhotoService _photoService,
+   IPalestrantePersist _palestrantePersist
 ) : IAccountService
 {
    public UserManager<User> UserManager { get; } = _userManager;
@@ -33,6 +34,7 @@ public class AccountService(
    public IRefreshTokenPersist RefreshTokenPersist { get; } = _refreshTokenPersist;
    public IGeralPersist GeralPersist { get; } = _geralPersist;
    public IPhotoService PhotoService { get; } = _photoService;
+   public IPalestrantePersist PalestrantePersist { get; } = _palestrantePersist;
 
     public async Task<LoginResponseDto> LoginAsync(UserLoginDto userLogin)
    {
@@ -175,6 +177,8 @@ public class AccountService(
 
       userUpdateDto.Id = user.Id;
 
+      await SincronizarPalestranteAsync(userUpdateDto);
+
       Mapper.Map(userUpdateDto, user);
 
       if (!string.IsNullOrWhiteSpace(userUpdateDto.Password))
@@ -260,4 +264,37 @@ public class AccountService(
 
       return Mapper.Map<UserUpdateDto>(user);
     }
+
+    private async Task SincronizarPalestranteAsync(UserUpdateDto model)
+   {
+      var palestrante = await PalestrantePersist.GetPalestranteStatusByUserIdAsync(model.Id);
+
+      bool deveSerpalestrante = model.Funcao == "Palestrante";
+
+      if(deveSerpalestrante)
+      {
+         if(palestrante == null)
+         {
+            GeralPersist.Add(new Palestrante
+            {
+               UserId = model.Id,
+               Ativo = true
+            });
+
+            await GeralPersist.SaveChangesAsync();
+         }
+         else if(!palestrante.Ativo)
+         {
+            palestrante.Ativo = true;
+            GeralPersist.Update(palestrante);
+            await GeralPersist.SaveChangesAsync();
+         }
+      }
+      else if(palestrante?.Ativo == true)
+      {
+         palestrante.Ativo = false;
+         GeralPersist.Update(palestrante);
+         await GeralPersist.SaveChangesAsync();
+      }
+   }
 }

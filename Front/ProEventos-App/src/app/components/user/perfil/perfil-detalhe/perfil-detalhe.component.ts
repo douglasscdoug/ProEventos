@@ -91,22 +91,23 @@ export class PerfilDetalheComponent implements OnInit {
     const { confirmaPassword, ...userUpdate } = this.perfilForm.value;
     this.spinner.show();
 
-    if(this.f.funcao.value == 'Palestrante') {
-      this.palestranteService.post().subscribe({
-        next: () => {
-          this.toaster.success('Função palestrante ativada!', 'Sucesso!');
-          this.perfilAtualizado.emit();
-        },
-        error: (error: any) => {
-          this.toaster.error('A função palestrante não pode ser ativada, tente novamente mais tarde.', 'Erro!');
-          console.error(error);
-        }
-      })
-    }
+    // if(this.f.funcao.value == 'Palestrante') {
+    //   this.palestranteService.post().subscribe({
+    //     next: () => {
+    //       this.toaster.success('Função palestrante ativada!', 'Sucesso!');
+    //       this.perfilAtualizado.emit();
+    //     },
+    //     error: (error: any) => {
+    //       this.toaster.error('A função palestrante não pode ser ativada, tente novamente mais tarde.', 'Erro!');
+    //       console.error(error);
+    //     }
+    //   })
+    // }
 
     this.accountService.updateUser(userUpdate).subscribe({
       next: () => { 
         this.toaster.success('Usuário atualizado', 'Sucesso');
+        this.perfilAtualizado.emit();
         this.carregarUsuario();
       },
       error: (error: any) => {
