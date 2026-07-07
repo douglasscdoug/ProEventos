@@ -32,51 +32,26 @@ namespace ProEventos.API.Controllers
         [HttpGet]
         public async Task<IActionResult> GetPalestrantes()
         {
-            try
-            {
-                var palestrante = await PalestranteService.GetPalestranteByUserIdAsync(User.GetUserId(), true);
-                if (palestrante == null) return NoContent();
+            var palestrante = await PalestranteService.GetPalestranteByUserIdAsync(User.GetUserId(), true);
+            if (palestrante == null) return NoContent();
 
-                return Ok(palestrante);
-            }
-            catch (Exception ex)
-            {
-                return this.StatusCode(StatusCodes.Status500InternalServerError,
-                    $"Erro ao tentar recuperar palestrantes. Erro: {ex.Message}");
-            }
+            return Ok(palestrante);
         }
 
         [HttpPost]
         public async Task<IActionResult> Post(PalestranteAddDto model)
         {
-            try
-            {
-                var palestrante = await PalestranteService.GetPalestranteByUserIdAsync(User.GetUserId(), false);
-                if (palestrante == null) palestrante = await PalestranteService.AddPalestrante(User.GetUserId(), model);
-
-                return Ok(palestrante);
-            }
-            catch (Exception ex)
-            {
-                return this.StatusCode(StatusCodes.Status500InternalServerError,
-                    $"Erro ao tentar recuperar palestrantes. Erro: {ex.Message}");
-            }
+            var palestrante = await PalestranteService.GetPalestranteByUserIdAsync(User.GetUserId(), false);
+            return Ok(palestrante);
         }
+
         [HttpPut]
         public async Task<IActionResult> Put(PalestranteUpdateDto model)
         {
-            try
-            {
-                var palestrante = await PalestranteService.UpdatePalestrante(User.GetUserId(), model);
-                if (palestrante == null) return NoContent();
+            var palestrante = await PalestranteService.UpdatePalestrante(User.GetUserId(), model);
+            if (palestrante == null) return NotFound();
 
-                return Ok(palestrante);
-            }
-            catch (Exception ex)
-            {
-                return this.StatusCode(StatusCodes.Status500InternalServerError,
-                    $"Erro ao tentar atualizar os palestrantes. Erro: {ex.Message}");
-            }
+            return Ok(palestrante);
         }
     }
 }
