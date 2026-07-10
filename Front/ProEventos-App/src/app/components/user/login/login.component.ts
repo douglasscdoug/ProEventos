@@ -30,7 +30,7 @@ export class LoginComponent implements OnInit {
       next: () => { this.router.navigateByUrl('/dashboard'); },
       error: (error: any) => {
         if (error.status == 401)
-          this.toaster.error('Usuário ou senha inválido');
+          this.toaster.error('Usuário ou senha inválido', 'Erro');
 
         else
           console.error(error);

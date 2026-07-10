@@ -233,13 +233,22 @@ public class EventoService(
    {
       Logger.LogInformation("Iniciando exclusão de evento id: {EventoId}", eventoId);
 
-      var evento = await EventoPersist.GetEventoByIdAsync(userId, eventoId, false);
+      var evento = await EventoPersist.GetEventoByIdAsync(userId, eventoId, true);
       if (evento == null)
       {
          Logger.LogInformation("Tentativa de excluir evento inexistente id: {EventoId}", eventoId);
 
          return false;
       }
+
+      if(evento.Lotes.Any()) 
+         throw new BusinessException("Evento", "Não é possível excluir o evento porque existem lotes cadastrados.");
+
+      if(evento.RedesSociais.Any()) 
+         throw new BusinessException("Evento", "Não é possível excluir o evento porque existem redes sociais cadastradas.");
+
+      if(evento.PalestrantesEventos.Any()) 
+         throw new BusinessException("Evento", "Não é possível excluir o evento porque existem palestrantes cadastrados.");
 
       GeralPersist.Delete<Evento>(evento);
 
