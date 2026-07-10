@@ -20,6 +20,9 @@ using Serilog;
 using ProEventos.API.Middlewares;
 using ProEventos.Persistence.Services;
 using ProEventos.Domain.Configurations;
+using FluentValidation.AspNetCore;
+using FluentValidation;
+using ProEventos.Application.Validators;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -71,6 +74,10 @@ builder.Services.AddIdentityCore<User>(options =>
 .AddRoleValidator<RoleValidator<Role>>()
 .AddEntityFrameworkStores<ProEventosContext>()
 .AddDefaultTokenProviders();
+
+builder.Services.AddFluentValidationAutoValidation();
+builder.Services.AddFluentValidationClientsideAdapters();
+builder.Services.AddValidatorsFromAssemblyContaining<EventoDtoValidator>();
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>

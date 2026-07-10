@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using ProEventos.Application.Common.Utils;
 using ProEventos.Application.Contratos;
 using ProEventos.Application.Dtos;
 using ProEventos.Application.Exceptions;
@@ -176,6 +177,7 @@ public class AccountService(
          throw new BusinessException("User", "Usuário não encontrado.");
 
       userUpdateDto.Id = user.Id;
+      userUpdateDto.PhoneNumber = StringUtils.SomenteNumeros(userUpdateDto.PhoneNumber);
 
       await SincronizarPalestranteAsync(userUpdateDto);
 
