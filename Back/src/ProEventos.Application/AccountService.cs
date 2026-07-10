@@ -7,7 +7,7 @@ using ProEventos.Application.Common.Utils;
 using ProEventos.Application.Contratos;
 using ProEventos.Application.Dtos;
 using ProEventos.Application.Exceptions;
-using ProEventos.Domain;
+using ProEventos.Domain.Entities;
 using ProEventos.Domain.Identity;
 using ProEventos.Persistence.Contratos;
 

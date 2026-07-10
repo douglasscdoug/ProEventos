@@ -1,7 +1,6 @@
-using System;
 using System.Text.Json.Serialization;
 
-namespace ProEventos.Domain;
+namespace ProEventos.Domain.Entities;
 
 public class Lote
 {

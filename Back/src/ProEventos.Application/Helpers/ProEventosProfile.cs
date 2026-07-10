@@ -1,6 +1,6 @@
 using AutoMapper;
 using ProEventos.Application.Dtos;
-using ProEventos.Domain;
+using ProEventos.Domain.Entities;
 using ProEventos.Domain.Identity;
 
 namespace ProEventos.Application.Helpers;
