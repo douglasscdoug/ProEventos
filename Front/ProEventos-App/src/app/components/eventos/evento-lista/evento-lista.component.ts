@@ -140,9 +140,6 @@ export class EventoListaComponent implements OnInit {
       next: () => {
           this.toastr.success('Evento deletado com sucesso!', 'Sucesso!');
           this.buscar(this.searchControl.value);
-      },
-      error: (error: any) => {
-        this.toastr.error(`Erro ao tentar deletar o evento Id: ${this.eventoId}`, 'Erro');
       }
     });
   }
