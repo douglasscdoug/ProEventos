@@ -1,6 +1,6 @@
 using ProEventos.Domain.Identity;
 
-namespace ProEventos.Domain;
+namespace ProEventos.Domain.Entities;
 
 public class Evento
 {

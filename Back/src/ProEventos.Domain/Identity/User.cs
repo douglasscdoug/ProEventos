@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Identity;
+using ProEventos.Domain.Entities;
 using ProEventos.Domain.Enum;
 
 namespace ProEventos.Domain.Identity;

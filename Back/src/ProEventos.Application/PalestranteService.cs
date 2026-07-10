@@ -7,7 +7,7 @@ using ProEventos.Application.Contratos;
 using ProEventos.Application.Dtos;
 using ProEventos.Application.Exceptions;
 using ProEventos.Application.Filters;
-using ProEventos.Domain;
+using ProEventos.Domain.Entities;
 using ProEventos.Persistence.Contratos;
 
 namespace ProEventos.Application;

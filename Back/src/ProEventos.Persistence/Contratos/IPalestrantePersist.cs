@@ -1,5 +1,4 @@
-using ProEventos.Domain;
-using ProEventos.Persistence.Models;
+using ProEventos.Domain.Entities;
 
 namespace ProEventos.Persistence.Contratos;
 

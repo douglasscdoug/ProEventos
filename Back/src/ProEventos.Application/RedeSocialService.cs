@@ -1,10 +1,9 @@
-using System;
 using AutoMapper;
 using Microsoft.Extensions.Logging;
 using ProEventos.Application.Contratos;
 using ProEventos.Application.Dtos;
 using ProEventos.Application.Exceptions;
-using ProEventos.Domain;
+using ProEventos.Domain.Entities;
 using ProEventos.Persistence.Contratos;
 
 namespace ProEventos.Application;

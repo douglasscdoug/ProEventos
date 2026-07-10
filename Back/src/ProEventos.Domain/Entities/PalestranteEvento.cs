@@ -1,6 +1,4 @@
-using System;
-
-namespace ProEventos.Domain;
+namespace ProEventos.Domain.Entities;
 
 public class PalestranteEvento
 {
