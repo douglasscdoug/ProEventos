@@ -57,7 +57,12 @@ builder.Services.AddDbContext<ProEventosContext>(options =>
     }
 });
 
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.Converters.Add(
+            new JsonStringEnumConverter());
+    });
 
 builder.Services.AddIdentityCore<User>(options =>
     {
@@ -103,6 +108,7 @@ builder.Services.AddScoped<ILoteService, LoteService>();
 builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IPalestranteService, PalestranteService>();
+builder.Services.AddScoped<IParceiroService, ParceiroService>();
 builder.Services.AddScoped<IRedeSocialService, RedeSocialService>();
 builder.Services.AddScoped<IUtil, Util>();
 
@@ -111,6 +117,7 @@ builder.Services.AddScoped<IEventoPersist, EventoPersist>();
 builder.Services.AddScoped<ILotePersist, LotePersist>();
 builder.Services.AddScoped<IUserPersist, UserPersist>();
 builder.Services.AddScoped<IPalestrantePersist, PalestrantePersist>();
+builder.Services.AddScoped<IParceiroPersist, ParceiroPersist>();
 builder.Services.AddScoped<IRedeSocialPersist, RedeSocialPersist>();
 builder.Services.AddScoped<IRefreshTokenPersist, RefreshTokenPersist>();
 
