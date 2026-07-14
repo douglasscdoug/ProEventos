@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using ProEventos.Persistence.Contexts;
@@ -11,9 +12,11 @@ using ProEventos.Persistence.Contexts;
 namespace ProEventos.Persistence.Migrations
 {
     [DbContext(typeof(ProEventosContext))]
-    partial class ProEventosContextModelSnapshot : ModelSnapshot
+    [Migration("20260710223908_AdicionaEntidadeParceiro")]
+    partial class AdicionaEntidadeParceiro
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -151,7 +154,7 @@ namespace ProEventos.Persistence.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Eventos", (string)null);
+                    b.ToTable("Eventos");
                 });
 
             modelBuilder.Entity("ProEventos.Domain.Entities.Lote", b =>
@@ -186,7 +189,7 @@ namespace ProEventos.Persistence.Migrations
 
                     b.HasIndex("EventoId");
 
-                    b.ToTable("Lotes", (string)null);
+                    b.ToTable("Lotes");
                 });
 
             modelBuilder.Entity("ProEventos.Domain.Entities.Palestrante", b =>
@@ -210,7 +213,7 @@ namespace ProEventos.Persistence.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Palestrantes", (string)null);
+                    b.ToTable("Palestrantes");
                 });
 
             modelBuilder.Entity("ProEventos.Domain.Entities.PalestranteEvento", b =>
@@ -225,7 +228,7 @@ namespace ProEventos.Persistence.Migrations
 
                     b.HasIndex("PalestranteId");
 
-                    b.ToTable("PalestrantesEventos", (string)null);
+                    b.ToTable("PalestrantesEventos");
                 });
 
             modelBuilder.Entity("ProEventos.Domain.Entities.Parceiro", b =>
@@ -244,9 +247,6 @@ namespace ProEventos.Persistence.Migrations
 
                     b.Property<string>("Email")
                         .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("ImagemPublicId")
                         .HasColumnType("text");
 
                     b.Property<string>("ImagemUrl")
@@ -270,14 +270,9 @@ namespace ProEventos.Persistence.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int>("UserId")
-                        .HasColumnType("integer");
-
                     b.HasKey("Id");
 
-                    b.HasIndex("UserId");
-
-                    b.ToTable("Parceiros", (string)null);
+                    b.ToTable("Parceiros");
                 });
 
             modelBuilder.Entity("ProEventos.Domain.Entities.RedeSocial", b =>
@@ -308,7 +303,7 @@ namespace ProEventos.Persistence.Migrations
 
                     b.HasIndex("PalestranteId");
 
-                    b.ToTable("RedesSociais", (string)null);
+                    b.ToTable("RedesSociais");
                 });
 
             modelBuilder.Entity("ProEventos.Domain.Entities.RefreshToken", b =>
@@ -334,7 +329,7 @@ namespace ProEventos.Persistence.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("RefreshTokens", (string)null);
+                    b.ToTable("RefreshTokens");
                 });
 
             modelBuilder.Entity("ProEventos.Domain.Identity.Role", b =>
@@ -557,17 +552,6 @@ namespace ProEventos.Persistence.Migrations
                     b.Navigation("Evento");
 
                     b.Navigation("Palestrante");
-                });
-
-            modelBuilder.Entity("ProEventos.Domain.Entities.Parceiro", b =>
-                {
-                    b.HasOne("ProEventos.Domain.Identity.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("ProEventos.Domain.Entities.RedeSocial", b =>

@@ -11,10 +11,12 @@ import { UserComponent } from './components/user/user.component';
 import { LoginComponent } from './components/user/login/login.component';
 import { RegistrationComponent } from './components/user/registration/registration.component';
 
-import { ContatosComponent } from './components/contatos/contatos.component';
 import { PerfilComponent } from './components/user/perfil/perfil.component';
 import { authGuard } from './guard/auth.guard';
 import { HomeComponent } from './components/home/home.component';
+import { ParceirosComponent } from './components/parceiros/parceiros.component';
+import { ParceiroListaComponent } from './components/parceiros/parceiro-lista/parceiro-lista.component';
+import { ParceiroDetalheComponent } from './components/parceiros/parceiro-detalhe/parceiro-detalhe.component';
 
 export const routes: Routes = [
    { path: '', redirectTo: 'home', pathMatch: 'full' },
@@ -35,7 +37,15 @@ export const routes: Routes = [
             ]
          },
          { path: 'palestrantes', component: PalestrantesComponent },
-         { path: 'contatos', component: ContatosComponent },
+         { path: 'parceiros', redirectTo: 'parceiros/lista'},
+         { 
+            path: 'parceiros', component: ParceirosComponent,
+            children: [
+               {path: 'lista', component: ParceiroListaComponent},
+               {path: 'detalhe', component: ParceiroDetalheComponent},
+               {path: 'detalhe/:id', component: ParceiroDetalheComponent}
+            ]
+         },
          { path: 'dashboard', component: DashboardComponent },
       ]
    },

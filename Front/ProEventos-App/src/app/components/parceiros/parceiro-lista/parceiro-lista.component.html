@@ -1,0 +1,164 @@
+<div class="card rounded shadow-sm p-3">
+    <div class="d-flex">
+        <div class="flex-fill pe-3">
+            <div class="d-flex align-items-center mb-3">
+                <h3>Filtros</h3>
+                <div class="ms-auto">
+                    <button type="button" class="d-flex btn btn-outline-primary ms-auto"
+                        routerLink="/parceiros/detalhe">
+                        <i class="fa fa-plus-circle my-1"></i>
+                        <b class="ms-1 d-none d-sm-block">Inserir</b>
+                    </button>
+                    <!-- <a class="d-flex btn btn-outline-primary" routerLink="/parceiros/detalhe">
+                    <i class="fa fa-plus-circle my-1"></i>
+                    <b class="ms-1 d-none d-sm-block">Inserir</b>
+                </a> -->
+                </div>
+            </div>
+            <form [formGroup]="filtroForm">
+                <div class="row g-2 mb-2">
+                    <div class="col-md-5">
+                        <label class="form-label">Nome</label>
+                        <input class="form-control" formControlName="nome" placeholder="Filtrar por nome">
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label">Categoria</label>
+                        <select class="form-select" formControlName="categoria">
+                            <option value="">Todas</option>
+
+                            @for (categoria of categorias; track categoria) {
+                            <option [value]="categoria">
+                                {{ categoriaDescricao[categoria] }}
+                            </option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label">Ativo</label>
+                        <select class="form-select" formControlName="ativo">
+                            <option [ngValue]="null">Todos</option>
+                            <option [ngValue]="true">Sim</option>
+                            <option [ngValue]="false">Não</option>
+                        </select>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    @if(loading){
+    <div class="text-center my-4">
+        <div class="spinner-border"></div>
+    </div>
+    }
+    @else {
+    <div class="flex-fill pe-3">
+        <table class="table table-striped table-hover">
+            <thead class="table-dark">
+                <tr>
+                    <th class="d-none d-md-table-cell">
+                        <button type="button" class="btn btn-outline-light btn-sm" (click)="alterarImagem()">
+                            <i class="{{ !mostrarImagem ? 'fa fa-eye' : 'fa fa-eye-slash' }}"></i>
+                            {{ !mostrarImagem ? "Exibir" : "Ocultar" }}
+                        </button>
+                    </th>
+                    <th>#</th>
+                    <th (click)="ordenar('nome')" style="cursor: pointer">Nome
+                        @if(orderBy === 'nome'){
+                        <i class="bi" [ngClass]="desc ? 'bi-caret-down' : 'bi-caret-up'"></i>
+                        }
+                    </th>
+                    <th class="d-none d-md-table-cell" (click)="ordenar('categoria')" style="cursor: pointer">
+                        Categoria
+                        @if(orderBy === 'categoria'){
+                        <i class="bi" [ngClass]="desc ? 'bi-caret-down' : 'bi-caret-up'"></i>
+                        }
+                    </th>
+                    <th (click)="ordenar('responsavel')" style="cursor: pointer">
+                        Responsável
+                        @if(orderBy === 'responsavel'){
+                        <i class="bi" [ngClass]="desc ? 'bi-caret-down' : 'bi-caret-up'"></i>
+                        }
+                    </th>
+                    <th class="d-none d-md-table-cell" (click)="ordenar('ativo')" style="cursor: pointer">
+                        Ativo
+                        @if(orderBy === 'ativo'){
+                        <i class="bi" [ngClass]="desc ? 'bi-caret-down' : 'bi-caret-up'"></i>
+                        }
+                    </th>
+                    <th>Opções</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (p of parceiros; track p.id) {
+                <tr (click)="detalheParceiro(p.id)" style="cursor: pointer">
+                    <td class="d-none d-md-table-cell">
+                        <img [collapse]="!mostrarImagem" [isAnimated]="true" [src]="mostraImagem(p.imagemUrl)"
+                            class="fotosGrid" width="200" height="100" />
+                    </td>
+                    <td>{{p.id}}</td>
+                    <td>{{p.nome}}</td>
+                    <td>{{p.categoria}}</td>
+                    <td>{{p.responsavel}}</td>
+                    <td>
+                        @if(p.ativo){
+                        <span class="badge bg-success">Sim</span>
+                        }
+                        @if(!p.ativo){
+                        <span class="badge bg-danger">Não</span>
+                        }
+                    </td>
+                    <td>
+                        @if (p.ativo) {
+                        <button class="btn btn-sm btn-outline-warning" title="Desativar"
+                            (click)="openModal($event, template, p.id, p.ativo)">
+                            <i class="fas fa-toggle-on"></i>
+                        </button>
+                        } @else {
+                        <button class="btn btn-sm btn-outline-success" title="Ativar"
+                            (click)="openModal($event, template, p.id, p.ativo)">
+                            <i class="fas fa-toggle-off"></i>
+                        </button>
+                        }
+                    </td>
+                </tr>
+                }
+            </tbody>
+        </table>
+        @if(parceiros.length === 0) {
+        <div class="text-center my-3">Nenhum registro encontrado</div>
+        }
+    </div>
+    }
+    <div class="d-flex justify-content-between align-items-center mt-3">
+        <div>
+            <span> Exibindo {{ parceiros.length }} de {{ total }} registros </span>
+        </div>
+        <div class="d-flex align-items-center gap-3">
+            <div>
+                <label class="me-2">Itens por página:</label>
+                <select class="form-select d-inline w-auto" [value]="pageSize" (change)="onPageSizeChange($event)">
+                    <option [value]="5">5</option>
+                    <option [value]="10">10</option>
+                    <option [value]="20">20</option>
+                </select>
+            </div>
+        </div>
+        <pagination [boundaryLinks]="true" [totalItems]="total" [itemsPerPage]="pageSize"
+            (pageChanged)="pageChanged($event)" pageBtnClass="btn" previousText="&lsaquo;" nextText="&rsaquo;"
+            firstText="&laquo;" lastText="&raquo;">
+        </pagination>
+    </div>
+</div>
+<ng-template #template>
+    <div class="modal-body text-center">
+        <p>{{ ativarParceiro ? 'Ativar' : 'Desativar'}} parceiro Id: {{ parceiroId }}?</p>
+        <button type="button" class="btn btn-default" (click)="confirm()">
+            Sim
+        </button>
+        <button type="button" class="btn btn-primary" (click)="decline()">
+            Não
+        </button>
+    </div>
+</ng-template>
