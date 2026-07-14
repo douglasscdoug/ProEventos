@@ -1,5 +1,6 @@
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using ProEventos.Application.Common.Utils;
@@ -16,13 +17,15 @@ namespace ProEventos.Application
         IGeralPersist geralPersist,
         IParceiroPersist parceiroPersist,
         IMapper mapper,
-        ILogger<ParceiroService> logger
+        ILogger<ParceiroService> logger,
+        IPhotoService photoService
     ) : IParceiroService
     {
         public IGeralPersist GeralPersist { get; } = geralPersist;
         public IParceiroPersist ParceiroPersist { get; } = parceiroPersist;
         public IMapper Mapper { get; } = mapper;
         public ILogger<ParceiroService> Logger { get; } = logger;
+        public IPhotoService PhotoService { get; } = photoService;
 
         public async Task<PagedResult<ParceiroDto>> Filtrar(int userId, ParceiroFiltroDto filtro)
         {
@@ -104,7 +107,7 @@ namespace ProEventos.Application
             Logger.LogInformation("Buscando parceiro id: {ParceiroId}, para usuário id: {UserId}", parceiroId, userId);
 
             var parceiro = await ParceiroPersist.GetByIdAsync(userId, parceiroId);
-            if(parceiro == null)
+            if (parceiro == null)
             {
                 Logger.LogInformation("Parceiro Id: {ParceiroId} não encontrado", parceiroId);
                 return null;
@@ -143,7 +146,7 @@ namespace ProEventos.Application
             Logger.LogInformation("Iniciando atualização do parceiro id: {parceiroId}", parceiroId);
 
             var parceiro = await ParceiroPersist.GetByIdForUpdateAsync(userId, parceiroId);
-            if(parceiro == null)
+            if (parceiro == null)
             {
                 Logger.LogInformation("Tentativa de atualização de parceiro inexistente id: {ParceiroId}", parceiroId);
 
@@ -173,7 +176,7 @@ namespace ProEventos.Application
         {
             var parceiro = await ParceiroPersist.GetByIdForUpdateAsync(userId, parceiroId);
 
-            if(parceiro == null) return null;
+            if (parceiro == null) return null;
 
             parceiro.Ativo = !parceiro.Ativo;
 
@@ -181,13 +184,54 @@ namespace ProEventos.Application
 
             var sucess = await GeralPersist.SaveChangesAsync();
 
-            if(!sucess) throw new BusinessException("Erro", "Erro ao salvar status do parceiro");
+            if (!sucess) throw new BusinessException("Erro", "Erro ao salvar status do parceiro");
 
             Logger.LogInformation(
                 "Parceiro id: {ParceiroId} foi {Status} com sucesso.",
                 parceiroId,
                 status
             );
+
+            return Mapper.Map<ParceiroDto>(parceiro);
+        }
+
+        public async Task<ParceiroDto> UploadImageAsync(int userId, int parceiroId, IFormFile file)
+        {
+            var parceiro = await ParceiroPersist.GetByIdAsync(userId, parceiroId);
+            if (parceiro == null) throw new BusinessException("Parceiro", "Parceiro não encontrado");
+
+            if (file == null || file.Length == 0)
+                throw new BusinessException("Parceiro", "Arquivo de imagem inválido");
+
+            await using var stream = file.OpenReadStream();
+
+            var uploadResult = await PhotoService.UploadImageAsync(stream, file.FileName, "proEventos/images");
+
+            if (uploadResult == null)
+                throw new BusinessException("Parceiro", "Erro ao fazer upload da imagem");
+
+            if (!string.IsNullOrEmpty(parceiro.ImagemPublicId))
+            {
+                var deleteResult = await PhotoService.DeleteImageAsync(parceiro.ImagemPublicId);
+
+                if (!deleteResult)
+                    Logger.LogWarning("Falha ao deletar imagem antiga do parceiro id: {ParceiroId}", parceiroId);
+            }
+
+            parceiro.ImagemUrl = uploadResult.Url;
+            parceiro.ImagemPublicId = uploadResult.PublicId;
+
+            GeralPersist.Update(parceiro);
+
+            var sucess = await GeralPersist.SaveChangesAsync();
+
+            if (!sucess)
+            {
+                Logger.LogInformation("Erro ao atualizar imagem do parceiro id: {ParceiroId}", parceiroId);
+                throw new BusinessException("Parceiro", "Erro ao salvar imagem do parceiro");
+            }
+
+            Logger.LogInformation("Imagem do parceiro id: {parceiroId} atualizada com sucesso", parceiroId);
 
             return Mapper.Map<ParceiroDto>(parceiro);
         }

@@ -32,6 +32,7 @@ export class ParceiroDetalheComponent implements OnInit{
   public categoriaDescricao = CategoriaDescricao;
   public imagemURL = 'assets/images/upload.png';
   public parceiro = {} as Parceiro;
+  public file!: File;
 
   public form: FormGroup = this.fb.group({
     nome: ['', Validators.required],
@@ -94,21 +95,39 @@ export class ParceiroDetalheComponent implements OnInit{
     this.parceiroService.getById(id).subscribe((res) => {
       this.parceiro = res;
       this.form.patchValue(res);
+
+      if(!(this.parceiro.imagemUrl === '' || this.parceiro.imagemUrl === null)){
+            this.imagemURL = this.parceiro.imagemUrl;
+          }
     })
   }
 
   public onFileChange(ev: any): void {
-    // const reader = new FileReader();
+    const reader = new FileReader();
 
-    // reader.onload = (event: any) => this.imagemURL = event.target.result;
+    reader.onload = (event: any) => this.imagemURL = event.target.result;
 
-    // const files: FileList = ev.target.files;
+    const files: FileList = ev.target.files;
 
-    // if (files.length > 0) {
-    //   this.file = files[0];
-    //   reader.readAsDataURL(files[0]);
-    // }
+    if (files.length > 0) {
+      this.file = files[0];
+      reader.readAsDataURL(files[0]);
+    }
 
-    // this.uploadImagem();
+    this.uploadImagem();
+  }
+
+  public uploadImagem(): void {
+    this.spinner.show();
+    this.parceiroService.postUpload(this.parceiroId, this.file).subscribe({
+      next: () => {
+        this.load(this.parceiroId);
+        this.toastr.success('Imagem atualizada com sucesso', 'sucesso!');
+      },
+      error: (error: any) => {
+        this.toastr.error('Erro ao fazer upload da imagem', 'Erro!!');
+        console.error(error);
+      }
+    }).add(() => this.spinner.hide());
   }
 }

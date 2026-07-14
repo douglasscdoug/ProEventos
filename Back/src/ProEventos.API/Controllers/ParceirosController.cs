@@ -25,7 +25,7 @@ namespace ProEventos.API.Controllers
         public async Task<IActionResult> GetById(int id)
         {
             var parceiro = await ParceiroService.GetByIdAsync(User.GetUserId(), id);
-            if(parceiro == null) return NotFound();
+            if (parceiro == null) return NotFound();
 
             return Ok(parceiro);
         }
@@ -35,14 +35,14 @@ namespace ProEventos.API.Controllers
         {
             var parceiro = await ParceiroService.AddAsync(User.GetUserId(), model);
 
-            return CreatedAtAction(nameof(GetById), new {id = parceiro.Id}, parceiro);
+            return CreatedAtAction(nameof(GetById), new { id = parceiro.Id }, parceiro);
         }
 
         [HttpPut("{id}")]
         public async Task<IActionResult> Put(int id, ParceiroDto model)
         {
             var parceiro = await ParceiroService.UpdateAsync(User.GetUserId(), id, model);
-            if(parceiro == null) return NotFound();
+            if (parceiro == null) return NotFound();
 
             return Ok(parceiro);
         }
@@ -52,9 +52,17 @@ namespace ProEventos.API.Controllers
         {
             var parceiro = await ParceiroService.AlterarStatusAsync(User.GetUserId(), id);
 
-            if(parceiro == null) return NotFound();
+            if (parceiro == null) return NotFound();
 
             return Ok(parceiro);
+        }
+
+        [HttpPost("upload-image/{parceiroId}")]
+        public async Task<IActionResult> UploadImage(int parceiroId, IFormFile file)
+        {
+            var result = await ParceiroService.UploadImageAsync(User.GetUserId(), parceiroId, file);
+
+            return Ok(result);
         }
     }
 }

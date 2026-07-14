@@ -3,7 +3,7 @@ import { inject, Injectable } from '@angular/core';
 import { PagedResult } from '@app/models/paged-result';
 import { Parceiro } from '@app/models/parceiro';
 import { environment } from '@environments/environment';
-import { Observable } from 'rxjs';
+import { Observable, take } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -24,7 +24,7 @@ export class ParceiroService {
       }
     });
 
-    return this.http.get<PagedResult<Parceiro>> (this.baseURL, {params});
+    return this.http.get<PagedResult<Parceiro>>(this.baseURL, { params });
   }
 
   public getById(id: number): Observable<Parceiro> {
@@ -35,11 +35,19 @@ export class ParceiroService {
     return this.http.post<Parceiro>(this.baseURL, parceiro);
   }
 
-  public put(parceiro: Parceiro, id: number): Observable<Parceiro>{
+  public put(parceiro: Parceiro, id: number): Observable<Parceiro> {
     return this.http.put<Parceiro>(`${this.baseURL}/${id}`, parceiro);
   }
 
-  public alterarStatus(id: number): Observable<Parceiro>{
+  public alterarStatus(id: number): Observable<Parceiro> {
     return this.http.patch<Parceiro>(`${this.baseURL}/${id}/status`, {});
+  }
+
+  public postUpload(parceiroId: number, file: File): Observable<Parceiro> {
+    //const fileToUpload = file[0] as File;
+    const formData = new FormData();
+    formData.append('file', file, file.name)
+
+    return this.http.post<Parceiro>(`${this.baseURL}/upload-image/${parceiroId}`, formData).pipe(take(1));
   }
 }

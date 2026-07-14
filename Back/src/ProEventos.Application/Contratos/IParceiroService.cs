@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Http;
 using ProEventos.Application.Common.Utils;
 using ProEventos.Application.Dtos;
 using ProEventos.Application.Filters;
@@ -11,5 +12,6 @@ namespace ProEventos.Application.Contratos
         Task<ParceiroDto> AddAsync(int userId, ParceiroDto model);
         Task<ParceiroDto?> UpdateAsync(int userId, int parceiroId, ParceiroDto model);
         Task<ParceiroDto?> AlterarStatusAsync(int userId, int parceiroId);
+        Task<ParceiroDto> UploadImageAsync(int userId, int parceiroId, IFormFile file);
     }
 }
