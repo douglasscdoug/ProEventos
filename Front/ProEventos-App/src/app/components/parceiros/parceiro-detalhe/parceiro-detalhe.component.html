@@ -1,0 +1,129 @@
+<div class="row">
+    <div [ngClass]="{ 'col-md-8 pe-0': isEditMode, 'col-md-12': !isEditMode }">
+        <div class="card rounded shadow-sm">
+            <form [formGroup]="form">
+                <div class="p-3">
+                    <div class="row">
+                        <div class="form-group col-md-4">
+                            <label>Nome</label>
+                            <input type="text" class="form-control" [ngClass]="{'is-invalid': isInvalid('nome')}"
+                                formControlName="nome" placeholder="Insira o nome" />
+                            @if(f.nome.errors?.required){
+                            <div class="invalid-feedback">Obrigatório</div>
+                            }
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label>Responsavel</label>
+                            <input type="text" class="form-control" [ngClass]="{'is-invalid': isInvalid('responsavel')}"
+                                formControlName="responsavel" placeholder="Insira o nome do responsável" />
+                            @if(f.responsavel.errors?.required){
+                            <div class="invalid-feedback">Obrigatório</div>
+                            }
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label>Categoria</label>
+                            <select class="form-control" formControlName="categoria">
+                                @for (categoria of categorias; track categoria) {
+                                <option [value]="categoria">
+                                    {{ categoriaDescricao[categoria] }}
+                                </option>
+                                }
+                            </select>
+                            @if(f.categoria.errors?.required){
+                            <div class="invalid-feedback">Obrigatório</div>
+                            }
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group col-md-3">
+                            <label>E-mail</label>
+                            <input type="text" class="form-control" [ngClass]="{'is-invalid': isInvalid('email')}"
+                                formControlName="email" placeholder="Insira o e-mail" />
+                            @if(f.email.errors?.required){
+                            <div class="invalid-feedback">Obrigatório</div>
+                            }
+                            @if(f.email.errors?.email){
+                            <div class="invalid-feedback">E-mail inválido</div>
+                            }
+                        </div>
+                        <div class="form-group col-md-3">
+                            <label>Telefone</label>
+                            <input type="text" class="form-control" [ngClass]="{'is-invalid': isInvalid('telefone')}"
+                                mask="(00) 00000-0000||(00) 0000-0000" formControlName="telefone"
+                                placeholder="Insira o telefone" />
+                            @if(f.telefone.errors?.required){
+                            <div class="invalid-feedback">Obrigatório</div>
+                            }
+                            @if(f.telefone.invalid){
+                            <div class="invalid-feedback">Telefone inválido</div>
+                            }
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label>Site</label>
+                            <input type="text" class="form-control" [ngClass]="{'is-invalid': isInvalid('site')}"
+                                formControlName="site" placeholder="Insira o link do site do parceiro" />
+                            @if(f.site.errors?.required){
+                            <div class="invalid-feedback">Obrigatório</div>
+                            }
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group col-md-12">
+                            <label>Observação</label>
+                            <textarea rows="5" placeholder="Insira a observação sobre o parceiro"
+                                formControlName="observacao" class="form-control"></textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <div class="d-flex">
+                        <button class="btn btn-outline-secondary me-auto border" (click)="resetForm()">
+                            Cancelar Alteração
+                        </button>
+                        <button class="btn btn-success" [disabled]="!form.valid" (click)="salvar()">
+                            <!-- <span class="spinner-border spinner-border-sm me-1"></span> -->
+                            Salvar
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    @if(isEditMode){
+    <div class="col-md-4">
+        <div [formGroup]="form" class="card-evento-view shadow-sm">
+            <div class="form-row">
+                <div class="form-group m-0">
+                    <input type="file" #file (change)="onFileChange($event)" class="form-control is-invalid"
+                        placeholder="" style="display: none" />
+                </div>
+            </div>
+            <div class="card profile-card-2">
+                <div class="card-img-block">
+                    <img class="image" [src]="imagemURL" (click)="file.click()" class="img-fluid" alt="Card image cap"
+                        tooltip="Uplaod de Nova Imagem" placement="bottom" />
+                </div>
+                <div class="card-body pt-3">
+                    <h4>{{ parceiro.nome }}</h4>
+                    <p class="card-text">
+                        <b>Responsável:</b> {{ parceiro.responsavel }}
+                        <br />
+                        <b>Categoria:</b> {{ parceiro.categoria }}
+                    </p>
+                    <hr />
+                    <p class="card-text">
+                        <b>Contatos</b><br />
+                        <small class="text-muted">Telefone: {{ parceiro.telefone }}</small>
+                        <br />
+                        <small class="text-muted">e-mail: {{ parceiro.email }}</small>
+                    </p>
+                    <p class="card-text">
+                        Site:
+                        <small class="text-muted">{{ parceiro.site }}</small>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    }
+</div>
