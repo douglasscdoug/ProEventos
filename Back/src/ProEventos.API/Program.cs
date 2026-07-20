@@ -1,5 +1,4 @@
 using System.Text.Json.Serialization;
-using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Http.Json;
 using Microsoft.EntityFrameworkCore;
 using ProEventos.Application;
@@ -7,8 +6,6 @@ using ProEventos.Application.Contratos;
 using ProEventos.Persistence;
 using ProEventos.Persistence.Contexts;
 using ProEventos.Persistence.Contratos;
-using AutoMapper;
-using Microsoft.Extensions.FileProviders;
 using ProEventos.Domain.Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -23,6 +20,8 @@ using ProEventos.Domain.Configurations;
 using FluentValidation.AspNetCore;
 using FluentValidation;
 using ProEventos.Application.Validators;
+using ProEventos.Application.Dashboard.Interfaces;
+using ProEventos.Application.Dashboard;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -103,6 +102,7 @@ builder.Services.Configure<CloudinarySettings>(
 
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
+builder.Services.AddScoped<IDashboardService, DashboardService>();
 builder.Services.AddScoped<IEventoService, EventoService>();
 builder.Services.AddScoped<ILoteService, LoteService>();
 builder.Services.AddScoped<IAccountService, AccountService>();
@@ -112,6 +112,7 @@ builder.Services.AddScoped<IParceiroService, ParceiroService>();
 builder.Services.AddScoped<IRedeSocialService, RedeSocialService>();
 builder.Services.AddScoped<IUtil, Util>();
 
+builder.Services.AddScoped<IDashboardPersist, DashboardPersist>();
 builder.Services.AddScoped<IGeralPersist, GeralPersist>();
 builder.Services.AddScoped<IEventoPersist, EventoPersist>();
 builder.Services.AddScoped<ILotePersist, LotePersist>();
