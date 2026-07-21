@@ -13,13 +13,12 @@ import { RegistrationComponent } from './components/user/registration/registrati
 
 import { PerfilComponent } from './components/user/perfil/perfil.component';
 import { authGuard } from './guard/auth.guard';
-import { HomeComponent } from './components/home/home.component';
 import { ParceirosComponent } from './components/parceiros/parceiros.component';
 import { ParceiroListaComponent } from './components/parceiros/parceiro-lista/parceiro-lista.component';
 import { ParceiroDetalheComponent } from './components/parceiros/parceiro-detalhe/parceiro-detalhe.component';
 
 export const routes: Routes = [
-   { path: '', redirectTo: 'home', pathMatch: 'full' },
+   { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
    {
       path: '',
       runGuardsAndResolvers: 'always',
@@ -56,6 +55,5 @@ export const routes: Routes = [
          { path: 'registration', component: RegistrationComponent }
       ]
    },
-   { path: 'home', component: HomeComponent },
-   { path: '**', redirectTo: 'home', pathMatch: 'full' }
+   { path: '**', redirectTo: 'dashboard', pathMatch: 'full' }
 ];

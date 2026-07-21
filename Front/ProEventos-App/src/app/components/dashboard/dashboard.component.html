@@ -1,1 +1,15 @@
-<app-titulo [titulo]="'Dashboard'" [iconClass]="'far fa-chart-bar'"></app-titulo>
+<app-titulo [titulo]="'Dashboard'" [iconClass]="'far fa-chart-bar'" [subTitulo]="'Visão geral dos seus eventos'"></app-titulo>
+
+<app-dashboard-cards [cards]="dashboard?.cards"></app-dashboard-cards>
+<div class="row mb-4">
+    <div class="col-12">
+        <app-dashboard-eventos-por-mes [dados]="dashboard?.eventosPorMes ?? []"></app-dashboard-eventos-por-mes>
+    </div>
+</div>
+<div class="row">
+    <div class="col-lg-8">
+        <app-dashboard-proximos-eventos
+            [eventos]="dashboard?.proximosEventos ?? []">
+        </app-dashboard-proximos-eventos>
+    </div>
+</div>
