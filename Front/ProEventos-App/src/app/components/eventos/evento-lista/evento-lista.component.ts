@@ -102,7 +102,7 @@ export class EventoListaComponent implements OnInit {
   }
 
   public ordenar(coluna: string): void {
-    if(this.orderBy === coluna){
+    if (this.orderBy === coluna) {
       this.desc = !this.desc;
     }
     else {
@@ -118,10 +118,8 @@ export class EventoListaComponent implements OnInit {
     this.mostrarImagem = !this.mostrarImagem;
   }
 
-  public mostraImagem(imagemURL: string): string {
-    return (imagemURL !== '')
-      ? imagemURL
-      : 'assets/images/semImagem.jpeg';
+  public mostraImagem(imagemURL: string | null | undefined): string {
+    return imagemURL?.trim() || 'assets/images/semImagem.jpeg';
   }
 
   openModal(event: any, template: TemplateRef<void>, eventoId: number) {
@@ -137,11 +135,11 @@ export class EventoListaComponent implements OnInit {
     this.eventoService.deleteEvento(this.eventoId)
       .pipe(finalize(() => this.spinner.hide()))
       .subscribe({
-      next: () => {
+        next: () => {
           this.toastr.success('Evento deletado com sucesso!', 'Sucesso!');
           this.buscar(this.searchControl.value);
-      }
-    });
+        }
+      });
   }
 
   decline(): void {

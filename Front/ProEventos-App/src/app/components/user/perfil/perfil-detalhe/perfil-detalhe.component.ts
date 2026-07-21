@@ -7,11 +7,9 @@ import { ValidatorField } from '@app/helpers/ValidatorField';
 import { UserDetails } from '@app/models/identity/user-details';
 import { UserUpdate } from '@app/models/identity/UserUpdate';
 import { AccountService } from '@app/services/account.service';
-import { PalestranteService } from '@app/services/palestrante.service';
 import { NgxMaskDirective } from 'ngx-mask';
 import { NgxSpinnerService } from 'ngx-spinner';
 import { ToastrService } from 'ngx-toastr';
-import { finalize } from 'rxjs';
 
 @Component({
   selector: 'app-perfil-detalhe',
@@ -32,7 +30,6 @@ export class PerfilDetalheComponent implements OnInit {
     private router: Router,
     private toaster: ToastrService,
     private spinner: NgxSpinnerService,
-    private palestranteService: PalestranteService
   ) {
     const formOptions: AbstractControlOptions = {
       validators: ValidatorField.MustMatch('password', 'confirmaPassword')
@@ -57,18 +54,16 @@ export class PerfilDetalheComponent implements OnInit {
     this.carregarUsuario();
   }
 
-  private verificaForm(): void {
-    this.perfilForm.valueChanges.subscribe(() =>
-      this.changeFormValue.emit({ ...this.perfilForm.value })
-    );
-  }
-
   private carregarUsuario(): void {
     this.spinner.show();
     this.accountService.getUser().subscribe({
       next: (userRetorno) => {
         this.userUpdate = userRetorno;
-        this.perfilForm.patchValue(this.userUpdate);
+        this.perfilForm.patchValue({
+          ...this.userUpdate,
+          password: null,
+          confirmaPassword: ''
+        });
         this.changeFormValue.emit(this.userUpdate);
         this.toaster.success('Usuario carregado', 'Sucesso');
       },
@@ -89,7 +84,7 @@ export class PerfilDetalheComponent implements OnInit {
   }
 
   public resetForm(): void {
-    this.perfilForm.reset();
+    this.carregarUsuario();
   }
 
   public atualizarUsuario() {

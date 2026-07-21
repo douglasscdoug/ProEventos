@@ -64,6 +64,10 @@ export class ParceiroDetalheComponent implements OnInit{
   }
 
   public resetForm(): void {
+    if(this.isEditMode){
+      this.form.reset();
+      this.load(this.parceiroId);
+    }
     this.form.reset();
   }
 
@@ -75,11 +79,11 @@ export class ParceiroDetalheComponent implements OnInit{
 
     this.spinner.show();
 
-    const data = { ...this.form.value };
+    this.parceiro = { ...this.parceiro, ...this.form.value }
 
     const request = this.isEditMode
-      ? this.parceiroService.put(data, this.parceiroId)
-      : this.parceiroService.post(data);
+      ? this.parceiroService.put(this.parceiro, this.parceiroId)
+      : this.parceiroService.post(this.parceiro);
 
     request
       .pipe(finalize(() => this.spinner.hide()))
@@ -93,7 +97,7 @@ export class ParceiroDetalheComponent implements OnInit{
 
   public load(id: number): void {
     this.parceiroService.getById(id).subscribe((res) => {
-      this.parceiro = res;
+      this.parceiro = { ... res };
       this.form.patchValue(res);
 
       if(!(this.parceiro.imagemUrl === '' || this.parceiro.imagemUrl === null)){
