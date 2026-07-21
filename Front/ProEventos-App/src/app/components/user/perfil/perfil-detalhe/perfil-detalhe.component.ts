@@ -69,17 +69,6 @@ export class PerfilDetalheComponent implements OnInit {
       next: (userRetorno) => {
         this.userUpdate = userRetorno;
         this.perfilForm.patchValue(this.userUpdate);
-        // this.perfilForm.patchValue({
-        //   userName: userRetorno.userName,
-        //   imagemUrl: userRetorno.imagemUrl,
-        //   titulo: userRetorno.titulo,
-        //   nome: userRetorno.nome,
-        //   sobrenome: userRetorno.sobrenome,
-        //   email: userRetorno.email,
-        //   phoneNumber: userRetorno.phoneNumber,
-        //   funcao: userRetorno.funcao,
-        //   descricao: userRetorno.descricao
-        // });
         this.changeFormValue.emit(this.userUpdate);
         this.toaster.success('Usuario carregado', 'Sucesso');
       },
