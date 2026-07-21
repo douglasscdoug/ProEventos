@@ -8,29 +8,27 @@ namespace ProEventos.Application.Dashboard
     {
         public async Task<DashboardDto> GetDashboardAsync(int userId)
         {
-            var cardsTask = dashboardPersist.GetCardsAsync(userId);
+            var cards = await dashboardPersist.GetCardsAsync(userId);
 
-            var eventosMesTask = dashboardPersist.GetEventosPorMesAsync(userId);
+            var eventosMes = await dashboardPersist.GetEventosPorMesAsync(userId);
 
-            var proximosEventosTask = dashboardPersist.GetProximosEventosAsync(userId);
-
-            await Task.WhenAll(cardsTask, eventosMesTask, proximosEventosTask);
+            var proximosEventos = await dashboardPersist.GetProximosEventosAsync(userId);
 
             return new DashboardDto
             {
                 Cards = new DashboardCardsDto
                 {
-                    TotalEventos = cardsTask.Result.TotalEventos,
-                    TotalPalestrantes = cardsTask.Result.TotalPalestrantes,
-                    TotalParceiros = cardsTask.Result.TotalParceiros
+                    TotalEventos = cards.TotalEventos,
+                    TotalPalestrantes = cards.TotalPalestrantes,
+                    TotalParceiros = cards.TotalParceiros
                 },
-                EventosPorMes = eventosMesTask.Result.Select(x => new DashboardEventosMesDto
+                EventosPorMes = eventosMes.Select(x => new DashboardEventosMesDto
                 {
                     Ano = x.Ano,
                     Mes = x.Mes,
                     Quantidade = x.Quantidade
                 }),
-                ProximosEventos = proximosEventosTask.Result.Select(x => new DashboardProximoEventoDto
+                ProximosEventos = proximosEventos.Select(x => new DashboardProximoEventoDto
                 {
                     Id = x.Id,
                     Tema = x.Tema,
