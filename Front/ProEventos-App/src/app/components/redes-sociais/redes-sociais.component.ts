@@ -21,8 +21,8 @@ export class RedesSociaisComponent implements OnInit {
   public redeSocialAtual = { id: 0, nome: '', indice: 0 };
 
   public get redesSociais(): FormArray {
-      return this.formRS.get('redesSociais') as FormArray;
-    }
+    return this.formRS.get('redesSociais') as FormArray;
+  }
 
   constructor(
     private fb: FormBuilder,
@@ -34,7 +34,7 @@ export class RedesSociaisComponent implements OnInit {
     this.formRS = this.fb.group({
       redesSociais: this.fb.array([])
     })
-   }
+  }
 
   ngOnInit(): void {
     this.carregarRedesSociais();
@@ -48,18 +48,22 @@ export class RedesSociaisComponent implements OnInit {
     return this.fb.group({
       id: [redeSocial.id],
       nome: [redeSocial.nome, Validators.required],
-      url:[redeSocial.url, Validators.required]
+      url: [redeSocial.url, Validators.required]
     })
   }
 
   private carregarRedesSociais(): void {
+    this.redesSociais.clear();
+
     let id = this.eventoId != 0 ? this.eventoId : this.palestranteId;
     let origem = this.eventoId != 0 ? 'evento' : 'palestrante';
 
-    if(this.eventoId != 0) origem = 'evento';
+    if (this.eventoId != 0) origem = 'evento';
+
+
 
     this.spinner.show();
-    
+
     this.redeSocialService.getRedesSociais(origem, id).subscribe({
       next: (redeSocialRetorno: RedeSocial[]) => {
         redeSocialRetorno.forEach((redeSocial) => {
@@ -110,8 +114,8 @@ export class RedesSociaisComponent implements OnInit {
 
     this.modalRef?.hide();
     this.spinner.show();
-    
-    if(this.eventoId != 0) origem = 'evento';
+
+    if (this.eventoId != 0) origem = 'evento';
 
     this.redeSocialService.deleteRedeSocial(origem, id, this.redeSocialAtual.id).subscribe({
       next: () => {
@@ -133,5 +137,16 @@ export class RedesSociaisComponent implements OnInit {
     return nome == null || nome == ''
       ? 'Rede Social'
       : nome;
+  }
+
+  public resetForm(): void {
+    const isEditMode = this.eventoId > 0 || this.palestranteId > 0;
+
+    if(isEditMode){
+      this.carregarRedesSociais();
+      return;
+    }
+
+    this.redesSociais.clear();
   }
 }

@@ -42,7 +42,7 @@
 
 <div class="card-footer">
   <div class="d-flex">
-    <button class="btn btn-outline-secondary me-auto border">
+    <button class="btn btn-outline-secondary me-auto border" (click)="resetForm()">
       Cancelar Alteração
     </button>
     <button [disabled]="formRS.get('redesSociais')?.invalid" (click)="salvarRedesSociais()" class="btn btn-success">

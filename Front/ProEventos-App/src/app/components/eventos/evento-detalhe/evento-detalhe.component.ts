@@ -37,7 +37,7 @@ export class EventoDetalheComponent implements OnInit {
   eventoForm: FormGroup;
   evento = {} as Evento;
   estadoSalvar = 'post';
-  loteAtual = {id: 0, nome: '', indice: 0};
+  loteAtual = { id: 0, nome: '', indice: 0 };
   imagemURL = 'assets/images/upload.png';
   file!: File;
   palestrantesDiponiveis: Palestrante[] = [];
@@ -106,8 +106,8 @@ export class EventoDetalheComponent implements OnInit {
   }
 
   public adicionarLote(): void {
-    
-    this.lotes.push(this.criarLote({id: 0} as Lote));
+
+    this.lotes.push(this.criarLote({ id: 0 } as Lote));
   }
 
   public criarLote(lote: Lote): FormGroup {
@@ -124,7 +124,7 @@ export class EventoDetalheComponent implements OnInit {
   public carregarEvento(): void {
     this.eventoId = +this.activatedRouter.snapshot.paramMap.get('id')!;
 
-    if (this.eventoId != null && this.eventoId != 0)  {
+    if (this.eventoId != null && this.eventoId != 0) {
       this.spinner.show();
 
       this.estadoSalvar = 'put';
@@ -137,7 +137,7 @@ export class EventoDetalheComponent implements OnInit {
           if (this.evento.dataEvento) {
             this.evento.dataEvento = new Date(this.evento.dataEvento);  // Converte para Date
           }
-  
+
           // Atualiza os lotes com a conversão das datas
           if (this.evento.lotes && this.evento.lotes.length > 0) {
             this.evento.lotes.forEach(lote => {
@@ -148,7 +148,7 @@ export class EventoDetalheComponent implements OnInit {
 
           this.eventoForm.patchValue(this.evento);
 
-          if(this.evento.imagemUrl !== ''){
+          if (this.evento.imagemUrl?.trim()) {
             this.imagemURL = this.evento.imagemUrl;
           }
 
@@ -163,6 +163,8 @@ export class EventoDetalheComponent implements OnInit {
   }
 
   public carregarLotes(): void {
+    this.lotes.clear();
+
     this.loteService.getLotesByEventoId(this.eventoId).subscribe({
       next: (lotesRetorno: Lote[]) => {
         lotesRetorno.forEach(lote => {
@@ -174,12 +176,18 @@ export class EventoDetalheComponent implements OnInit {
       },
       error: (error: any) => {
         this.toastr.error('Erro ao tentar carregar lotes.', 'Erro!');
-          console.error(error);
+        console.error(error);
       }
     }).add(() => this.spinner.hide());
   }
 
   public resetForm(): void {
+    if (this.estadoSalvar === 'put') {
+      this.eventoForm.reset();
+      this.carregarEvento();
+      return;
+    }
+
     this.eventoForm.reset();
   }
 
@@ -213,17 +221,17 @@ export class EventoDetalheComponent implements OnInit {
 
   public salvarLotes(): void {
 
-    if(this.eventoForm.get('lotes')?.valid){
+    if (this.eventoForm.get('lotes')?.valid) {
       this.spinner.show();
       this.loteService.saveLote(this.eventoId, this.eventoForm.value.lotes).subscribe({
-        next: () => { 
+        next: () => {
           this.toastr.success('Lotes salvos com sucesso!', 'Sucesso');
         },
         error: (error: any) => {
           this.toastr.error('Erro ao tentar salvar lotes', 'Erro');
           console.error(error);
         },
-        complete: () => {}
+        complete: () => { }
       }).add(() => this.spinner.hide());
     }
   }
@@ -233,7 +241,7 @@ export class EventoDetalheComponent implements OnInit {
     this.loteAtual.nome = this.lotes.get(indice + '.nome')?.value;
     this.loteAtual.indice = indice;
 
-    this.modalRef = this.modalService.show(template, {class: 'modal-sm'});
+    this.modalRef = this.modalService.show(template, { class: 'modal-sm' });
   }
 
   public confirmDeleteLote(): void {
@@ -256,10 +264,10 @@ export class EventoDetalheComponent implements OnInit {
     this.modalRef?.hide();
   }
 
-  public retornaTituloLote(nome: string): string{
+  public retornaTituloLote(nome: string): string {
     return nome == null || nome == ''
-                ? 'Nome do Lote'
-                : nome;
+      ? 'Nome do Lote'
+      : nome;
   }
 
   public onFileChange(ev: any): void {
@@ -313,8 +321,7 @@ export class EventoDetalheComponent implements OnInit {
   }
 
   public getImagemUrl(imagemUrl: string | null | undefined): string {
-    if(imagemUrl) 
-      return imagemUrl;
+    if (imagemUrl) return imagemUrl;
 
     return './assets/images/perfil.png';
   }
@@ -327,7 +334,7 @@ export class EventoDetalheComponent implements OnInit {
 
   public salvarPalestrantes(): void {
     this.spinner.show();
-    
+
     const payloadPalestrante = this.palestrantesSelecionados.map(p => ({
       eventoId: this.eventoId,
       palestranteId: p.id
