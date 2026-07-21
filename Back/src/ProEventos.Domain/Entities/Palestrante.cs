@@ -10,5 +10,5 @@ public class Palestrante
    public int UserId { get; set; }
    public User User { get; set; }
    public IEnumerable<RedeSocial> ? RedesSociais { get; set; }
-   public IEnumerable<PalestranteEvento> ? PalestrantesEventos { get; set; }
+   public ICollection<PalestranteEvento> PalestrantesEventos { get; set; } = [];
 }

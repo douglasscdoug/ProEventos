@@ -52,4 +52,9 @@ public class EventoPersist(ProEventosContext _context) : IEventoPersist
 
       return query.AsQueryable();
     }
+
+    public IQueryable<Evento> Query()
+    {
+      return Context.Eventos.AsQueryable();
+    }
 }
