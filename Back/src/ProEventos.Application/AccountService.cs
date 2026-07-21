@@ -23,7 +23,8 @@ public class AccountService(
    IRefreshTokenPersist _refreshTokenPersist,
    IGeralPersist _geralPersist,
    IPhotoService _photoService,
-   IPalestrantePersist _palestrantePersist
+   IPalestrantePersist _palestrantePersist,
+   IEventoPersist eventoPersist
 ) : IAccountService
 {
    public UserManager<User> UserManager { get; } = _userManager;
@@ -221,13 +222,33 @@ public class AccountService(
       };
    }
 
-   public async Task<UserUpdateDto> GetUserByUserNameAsync(string userName)
+   public async Task<UserDetailsDto> GetUserByUserNameAsync(string userName)
    {
          var user = await UserPersist.GetUserByUserNameAsync(userName);
          if (user == null) throw new BusinessException("User", "Erro ao buscar usuário.");
 
-         var userUpdateDto = Mapper.Map<UserUpdateDto>(user);
-         return userUpdateDto;
+         var totalEventosCriados = await eventoPersist.Query().CountAsync(e => e.UserId == user.Id);
+
+         var totalEventosComopalestrante = await PalestrantePersist.GetTotalEventosComoPalestranteAsync(user.Id);
+
+         var userDetails = new UserDetailsDto
+         {
+            Id = user.Id,
+            Titulo = user.Titulo.ToString(),
+            UserName = user.UserName!,
+            Nome = user.Nome,
+            Sobrenome = user.Sobrenome,
+            Email = user.Email!,
+            PhoneNumber = user.PhoneNumber!,
+            Funcao = user.Funcao,
+            Descricao = user.Descricao,
+            ImagemUrl = user.ImagemURL,
+            TotalEventosCriados = totalEventosCriados,
+            TotalEventosComoPalestrante = totalEventosComopalestrante,
+            TotalEventosComoParticipante = 0
+         };
+
+         return userDetails;
    }
 
     public async Task<UserUpdateDto> UpdateProfileImageAsync(string userName, IFormFile file)

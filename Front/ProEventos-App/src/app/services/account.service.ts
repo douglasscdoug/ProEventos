@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { User } from '@app/models/identity/User';
+import { UserDetails } from '@app/models/identity/user-details';
 import { UserUpdate } from '@app/models/identity/UserUpdate';
 import { map, Observable, ReplaySubject, take } from 'rxjs';
 import { environment } from 'src/environments/environment';
@@ -109,8 +110,8 @@ export class AccountService {
     this.currentUserSource.next(user);
   }
 
-  public getUser(): Observable<UserUpdate> {
-    return this.http.get<UserUpdate>(this.baseURL + 'getUser').pipe(take(1));
+  public getUser(): Observable<UserDetails> {
+    return this.http.get<UserDetails>(this.baseURL + 'getUser').pipe(take(1));
   }
 
   public getToken(): string | null {

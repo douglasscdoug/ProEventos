@@ -8,4 +8,5 @@ public interface IEventoPersist
    Task<IEnumerable<PalestranteEvento>> GetPalestrantesByEventoIdAsync(int eventoId);
    Task<bool> EventoExistsAsync(int userId, int eventoId);
    IQueryable<Evento> Query(int userId);
+   IQueryable<Evento> Query();
 }

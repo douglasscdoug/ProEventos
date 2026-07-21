@@ -12,6 +12,7 @@ import { environment } from 'src/environments/environment';
 import { PalestranteDetalheComponent } from "../../palestrantes/palestrante-detalhe/palestrante-detalhe.component";
 import { RedesSociaisComponent } from "../../redes-sociais/redes-sociais.component";
 import { PalestranteService } from '@app/services/palestrante.service';
+import { UserDetails } from '@app/models/identity/user-details';
 
 @Component({
   selector: 'app-perfil',
@@ -20,7 +21,7 @@ import { PalestranteService } from '@app/services/palestrante.service';
   imports: [TituloComponent, ReactiveFormsModule, CommonModule, TabsModule, PerfilDetalheComponent, PalestranteDetalheComponent, RedesSociaisComponent]
 })
 export class PerfilComponent implements OnInit {
-  public usuario = {} as UserUpdate;
+  public usuario = {} as UserDetails;
   public imagemURL = '';
   public file!: File;
   palestranteId!: number;
@@ -41,7 +42,7 @@ export class PerfilComponent implements OnInit {
     this.carregarPalestrante();
   }
 
-  public setFormValue(usuario: UserUpdate): void {
+  public setFormValue(usuario: UserDetails): void {
     this.usuario = usuario;
     if (usuario.imagemUrl)
       this.imagemURL = this.usuario.imagemUrl!;

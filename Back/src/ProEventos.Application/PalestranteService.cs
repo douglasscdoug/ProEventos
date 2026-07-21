@@ -15,13 +15,14 @@ namespace ProEventos.Application;
 public class PalestranteService(
    IMapper _mapper,
    IPalestrantePersist _palestrantePersist,
+   IEventoPersist eventoPersist,
    ILogger<PalestranteService> _logger) : IPalestranteService
 {
    public IMapper Mapper { get; } = _mapper;
    public IPalestrantePersist PalestrantePersist { get; } = _palestrantePersist;
    public ILogger<PalestranteService> Logger { get; } = _logger;
 
-   public async Task<PagedResult<PalestranteDto>> FiltrarAsync(PalestranteFiltroDto filtro)
+   public async Task<PagedResult<PalestranteDetailsDto>> FiltrarAsync(PalestranteFiltroDto filtro)
    {
       Logger.LogInformation(
          "Iniciando filtro de palestrantes. Page={Page}, PageSize={PageSize}, Serch={Search}",
@@ -75,7 +76,36 @@ public class PalestranteService(
       var data = await query
          .Skip((filtro.Page - 1) * filtro.PageSize)
          .Take(filtro.PageSize)
-         .ProjectTo<PalestranteDto>(Mapper.ConfigurationProvider)
+         .Select(p => new PalestranteDetailsDto
+         {
+            Id = p.Id,
+            MiniCurriculo = p.MiniCurriculo,
+            Ativo = p.Ativo,
+            UserId = p.UserId,
+            User = new UserDetailsDto
+            {
+               Id = p.User.Id,
+               Nome = p.User.Nome,
+               Sobrenome = p.User.Sobrenome,
+               UserName = p.User.UserName!,
+               Email = p.User.Email!,
+               PhoneNumber = p.User.PhoneNumber!,
+               Funcao = p.User.Funcao,
+               ImagemUrl = p.User.ImagemURL,
+               TotalEventosCriados = eventoPersist.Query().Count(e => e.UserId == p.UserId),
+               TotalEventosComoPalestrante = p.PalestrantesEventos!.Count(),
+               TotalEventosComoParticipante = 0
+            },
+            RedesSociais = p.RedesSociais!
+               .Select(r => new RedeSocialDto
+               {
+                  Id = r.Id,
+                  Nome = r.Nome,
+                  URL = r.URL,
+                  PalestranteId = r.PalestranteId
+               })
+               .ToList()
+         })
          .ToListAsync();
 
       Logger.LogInformation(
@@ -84,7 +114,7 @@ public class PalestranteService(
          data.Count
       );
 
-      return new PagedResult<PalestranteDto>
+      return new PagedResult<PalestranteDetailsDto>
       {
          Data = data,
          Total = total,

@@ -43,4 +43,12 @@ public class PalestrantePersist(ProEventosContext _context) : GeralPersist(_cont
    {
       return await Context.Palestrantes.FirstOrDefaultAsync(p => p.UserId == userId);
    }
+
+    public async Task<int> GetTotalEventosComoPalestranteAsync(int userId)
+    {
+        return await Context.Palestrantes
+         .Where(p => p.UserId == userId)
+         .SelectMany(p => p.PalestrantesEventos)
+         .CountAsync();
+    }
 }

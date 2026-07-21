@@ -4,6 +4,7 @@ import { AbstractControlOptions, FormBuilder, FormGroup, ReactiveFormsModule, Va
 import { Router } from '@angular/router';
 import { phoneValidator } from '@app/helpers/Phone.Validator';
 import { ValidatorField } from '@app/helpers/ValidatorField';
+import { UserDetails } from '@app/models/identity/user-details';
 import { UserUpdate } from '@app/models/identity/UserUpdate';
 import { AccountService } from '@app/services/account.service';
 import { PalestranteService } from '@app/services/palestrante.service';
@@ -19,10 +20,10 @@ import { finalize } from 'rxjs';
   styleUrl: './perfil-detalhe.component.scss'
 })
 export class PerfilDetalheComponent implements OnInit {
-  userUpdate = {} as UserUpdate;
+  userUpdate = {} as UserDetails;
   perfilForm: FormGroup;
 
-  @Output() changeFormValue = new EventEmitter();
+  @Output() changeFormValue = new EventEmitter<UserDetails>();
   @Output() perfilAtualizado = new EventEmitter<void>();
 
   constructor(
@@ -47,26 +48,39 @@ export class PerfilDetalheComponent implements OnInit {
       phoneNumber: ['', [Validators.required, phoneValidator]],
       funcao: ['NaoInformado', Validators.required],
       descricao: ['', Validators.required],
-      password: ['',  Validators.minLength(6)],
+      password: ['', Validators.minLength(6)],
       confirmaPassword: ['']
     }, formOptions);
   }
 
   ngOnInit() {
     this.carregarUsuario();
-    this.verificaForm();
   }
 
   private verificaForm(): void {
-    this.perfilForm.valueChanges.subscribe(() => this.changeFormValue.emit({...this.perfilForm.value}));
+    this.perfilForm.valueChanges.subscribe(() =>
+      this.changeFormValue.emit({ ...this.perfilForm.value })
+    );
   }
 
   private carregarUsuario(): void {
     this.spinner.show();
     this.accountService.getUser().subscribe({
-      next: (userRetorno: UserUpdate) => {
+      next: (userRetorno) => {
         this.userUpdate = userRetorno;
         this.perfilForm.patchValue(this.userUpdate);
+        // this.perfilForm.patchValue({
+        //   userName: userRetorno.userName,
+        //   imagemUrl: userRetorno.imagemUrl,
+        //   titulo: userRetorno.titulo,
+        //   nome: userRetorno.nome,
+        //   sobrenome: userRetorno.sobrenome,
+        //   email: userRetorno.email,
+        //   phoneNumber: userRetorno.phoneNumber,
+        //   funcao: userRetorno.funcao,
+        //   descricao: userRetorno.descricao
+        // });
+        this.changeFormValue.emit(this.userUpdate);
         this.toaster.success('Usuario carregado', 'Sucesso');
       },
       error: (error: any) => {
@@ -90,24 +104,36 @@ export class PerfilDetalheComponent implements OnInit {
   }
 
   public atualizarUsuario() {
-    const { confirmaPassword, ...userUpdate } = this.perfilForm.value;
+    const {
+      userName,
+      nome,
+      sobrenome,
+      email,
+      titulo,
+      phoneNumber,
+      funcao,
+      descricao,
+      imagemUrl,
+      password
+    } = this.perfilForm.value;
+
+    const userUpdate: UserUpdate = {
+      userName,
+      nome,
+      sobrenome,
+      email,
+      titulo,
+      phoneNumber,
+      funcao,
+      descricao,
+      imagemUrl,
+      password
+    };
+
     this.spinner.show();
 
-    // if(this.f.funcao.value == 'Palestrante') {
-    //   this.palestranteService.post().subscribe({
-    //     next: () => {
-    //       this.toaster.success('Função palestrante ativada!', 'Sucesso!');
-    //       this.perfilAtualizado.emit();
-    //     },
-    //     error: (error: any) => {
-    //       this.toaster.error('A função palestrante não pode ser ativada, tente novamente mais tarde.', 'Erro!');
-    //       console.error(error);
-    //     }
-    //   })
-    // }
-
     this.accountService.updateUser(userUpdate).subscribe({
-      next: () => { 
+      next: () => {
         this.toaster.success('Usuário atualizado', 'Sucesso');
         this.perfilAtualizado.emit();
         this.carregarUsuario();

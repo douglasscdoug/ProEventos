@@ -12,6 +12,6 @@ public interface IPalestranteService
     
     //refatorados
     // Task<PageList<PalestranteDto>?> GetAllPalestrantesAsync(PageParams pageParams, bool includeEventos = false);
-    Task<PagedResult<PalestranteDto>> FiltrarAsync(PalestranteFiltroDto filtro);
+    Task<PagedResult<PalestranteDetailsDto>> FiltrarAsync(PalestranteFiltroDto filtro);
     Task<PalestranteDto?> GetPalestranteByUserIdAsync(int userId, bool includeEventos = false);
 }
