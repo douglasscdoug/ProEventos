@@ -4,7 +4,8 @@
     <div formArrayName="redesSociais" *ngFor="let redeSocial of redesSociais.controls; let i=index">
       <fieldset [formGroupName]="i" class="form-group">
         <legend class="d-flex justify-content-between capitalize">
-          {{ retornaTitulo(redesSociais.get(i+'.nome')?.value) }}
+          <i [ngClass]="retornaTitulo(redesSociais.get(i+'.nome')?.value)"></i>
+          <!-- {{ retornaTitulo(redesSociais.get(i+'.nome')?.value) }} -->
           <button class="btn btn-sm btn-warning mb-1" (click)="removerRedeSocial(template, i)">remove</button>
         </legend>
         <div class="row">
